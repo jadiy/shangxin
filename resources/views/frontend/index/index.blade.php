@@ -12,17 +12,17 @@
                                 <img src="/frontend/assets/img/avatar/1.jpg">
                             </a>
                         </div>
-                        <h5>小滕</h5>
-                        <p><small class="fs-13">PHP全栈开发工程师</small></p>
+                        <h5>学习</h5>
+                        <p><small class="fs-13">学习使人进步</small></p>
                         <p class="text-light fs-12 mb-50 fw-500">
-                            会一点PHP，会一点GO。知名在线点播系统MeEdu作者，已录制10余套课程。
+                            互联网课程学习。
                         </p>
-                        <div class="gap-items fs-16">
-                            <a class="text-facebook" target="_blank" href="https://github.com/Qsnh"><i class="fa fa-github"></i></a>
-                            <a class="text-dribbble" target="_blank" href="#"><i class="fa fa-qq"></i></a>
-                            <a class="text-twitter" target="_blank" href="#"><i class="fa fa-wechat"></i></a>
-                            <a class="text-google" target="_blank" href="https://weibo.com/xiaotenggogo"><i class="fa fa-weibo"></i></a>
-                        </div>
+                        {{--<div class="gap-items fs-16">--}}
+                            {{--<a class="text-facebook" target="_blank" href="https://github.com/Qsnh"><i class="fa fa-github"></i></a>--}}
+                            {{--<a class="text-dribbble" target="_blank" href="#"><i class="fa fa-qq"></i></a>--}}
+                            {{--<a class="text-twitter" target="_blank" href="#"><i class="fa fa-wechat"></i></a>--}}
+                            {{--<a class="text-google" target="_blank" href="https://weibo.com/xiaotenggogo"><i class="fa fa-weibo"></i></a>--}}
+                        {{--</div>--}}
                     </div>
                 </div>
 
@@ -44,7 +44,7 @@
                                 做技术必须要保持终生学习的习惯！
                             </p>
                             <p class="text-right">
-                                小滕 于2019年3月29日
+
                             </p>
                         </div>
                     </div>
@@ -88,10 +88,10 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card card-inverse" style="background-color: #3b5998">
                         <div class="card-header no-border">
-                            <h5 class="card-title card-title-bold">小滕</h5>
+                            <h5 class="card-title card-title-bold">张三</h5>
                         </div>
                         <blockquote class="blockquote blockquote-inverse no-border card-body m-0">
-                            <p>MeEdu 非常棒，我在几分钟之内就搭建好了自己的知识付费应用，感谢 MeEdu </p>
+                            <p>这是个好课程 </p>
                             <div class="flexbox">
                                 <time class="text-white" datetime="2017-10-02 20:00">2019/3/31</time>
                             </div>
@@ -102,10 +102,10 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card card-inverse" style="background-color: #3b5998">
                         <div class="card-header no-border">
-                            <h5 class="card-title card-title-bold">小滕</h5>
+                            <h5 class="card-title card-title-bold">张三</h5>
                         </div>
                         <blockquote class="blockquote blockquote-inverse no-border card-body m-0">
-                            <p>MeEdu 非常棒，我在几分钟之内就搭建好了自己的知识付费应用，感谢 MeEdu </p>
+                            <p>这是个好课程 </p>
                             <div class="flexbox">
                                 <time class="text-white" datetime="2017-10-02 20:00">2019/3/31</time>
                             </div>
@@ -116,10 +116,10 @@
                 <div class="col-md-6 col-lg-4">
                     <div class="card card-inverse" style="background-color: #3b5998">
                         <div class="card-header no-border">
-                            <h5 class="card-title card-title-bold">小滕</h5>
+                            <h5 class="card-title card-title-bold">张三</h5>
                         </div>
                         <blockquote class="blockquote blockquote-inverse no-border card-body m-0">
-                            <p>MeEdu 非常棒，我在几分钟之内就搭建好了自己的知识付费应用，感谢 MeEdu </p>
+                            <p>这是个好课程</p>
                             <div class="flexbox">
                                 <time class="text-white" datetime="2017-10-02 20:00">2019/3/31</time>
                             </div>
