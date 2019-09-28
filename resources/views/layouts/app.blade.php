@@ -142,7 +142,7 @@
 
     <div class="row">
         <div class="col-md-6 justify-content-center justify-content-md-start">
-            <p> 2019 <a href="https://www.beian.miit.gov.cn"> 湘ICP备15019816号	</a>. .</p>
+            <p> 2019 <a href="http://www.beian.miit.gov.cn"> 湘ICP备15019816号	</a>. .</p>
         </div>
 
         <div class="col-md-6">
