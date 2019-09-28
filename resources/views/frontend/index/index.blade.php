@@ -5,27 +5,6 @@
     <div class="container-fluid bg-primary pt-60 pb-40">
         <div class="container">
             <div class="row">
-                <div class="col-md-4 col-sm-12">
-                    <div class="card p-30 pt-50 text-center hover-shadow-2">
-                        <div>
-                            <a class="avatar avatar-xxl status-success mb-3" href="#">
-                                <img src="/frontend/assets/img/avatar/1.jpg">
-                            </a>
-                        </div>
-                        <h5>学习</h5>
-                        <p><small class="fs-13">学习使人进步</small></p>
-                        <p class="text-light fs-12 mb-50 fw-500">
-                            互联网课程学习。
-                        </p>
-                        {{--<div class="gap-items fs-16">--}}
-                            {{--<a class="text-facebook" target="_blank" href="https://github.com/Qsnh"><i class="fa fa-github"></i></a>--}}
-                            {{--<a class="text-dribbble" target="_blank" href="#"><i class="fa fa-qq"></i></a>--}}
-                            {{--<a class="text-twitter" target="_blank" href="#"><i class="fa fa-wechat"></i></a>--}}
-                            {{--<a class="text-google" target="_blank" href="https://weibo.com/xiaotenggogo"><i class="fa fa-weibo"></i></a>--}}
-                        {{--</div>--}}
-                    </div>
-                </div>
-
                 <div class="col-md-8 col-sm-12">
                     <div class="card hover-shadow-2">
                         <h4 class="card-title"><strong>关于学习的看法</strong></h4>
@@ -48,8 +27,19 @@
                             </p>
                         </div>
                     </div>
+                <div class="col-md-4 col-sm-12" style="padding-top: 160px;">
+                    <h1 style="padding: 10px 20px; background-color: #fff; color: #4ed2c5; font-weight: 800;">一切，从这里开始。</h1>
+                    <p class="mt-4">
+                        这里是一些关于我们的介绍
+                    </p>
+                    <p class="mt-4">
+                        <a href="{{route('courses')}}" class="btn btn-lg btn-danger">全部课程</a>
+                    </p>
                 </div>
 
+                <div class="col-md-8 col-sm-12">
+                    <img src="/images/index-banner-img.svg">
+                </div>
             </div>
         </div>
     </div>
@@ -161,7 +151,7 @@
                 <div class="col-sm-12">
                     <h5>友情链接</h5>
                     @foreach($links as $link)
-                        <a href="{{$link->url}}" target="_blank">{{$link->name}}</a>
+                        <a href="{{$link->url}}" target="_blank" style="margin-right: 2px; margin-bottom: 2px;">{{$link->name}}</a>
                     @endforeach
                 </div>
             </div>

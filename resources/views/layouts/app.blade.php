@@ -134,11 +134,11 @@
                     <a class="nav-link" href="#">注册</a>
                 </li>
             </ul>
+
         </div>
 
-    </div>
+        <hr>
 
-    <hr>
 
     <div class="row">
         <div class="col-md-6 justify-content-center justify-content-md-start">
@@ -155,6 +155,7 @@
                 </li>
             </ul>
         </div>
+    </div>
     </div>
 </footer>
 
