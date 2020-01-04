@@ -11,9 +11,9 @@
 
 namespace App\Http\Requests\Frontend;
 
+use App\Exceptions\ServiceException;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
-use App\Exceptions\MeeduErrorResponseJsonException;
 
 class BaseRequest extends FormRequest
 {
@@ -27,12 +27,12 @@ class BaseRequest extends FormRequest
         return true;
     }
 
-    // JSON下自定义数据返回格式
+    /**
+     * @param Validator $validator
+     * @throws ServiceException
+     */
     protected function failedValidation(Validator $validator)
     {
-        if ($this->expectsJson()) {
-            throw new MeeduErrorResponseJsonException($validator->errors()->all()[0]);
-        }
-        parent::failedValidation($validator);
+        throw new ServiceException(implode(',', $validator->errors()->all()));
     }
 }

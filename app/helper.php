@@ -9,7 +9,7 @@
  * with this source code in the file LICENSE.
  */
 
-if (! function_exists('flash')) {
+if (!function_exists('flash')) {
     function flash($message, $level = 'warning')
     {
         $message = new \Illuminate\Support\MessageBag([$level => $message]);
@@ -17,7 +17,7 @@ if (! function_exists('flash')) {
     }
 }
 
-if (! function_exists('get_first_flash')) {
+if (!function_exists('get_first_flash')) {
     /**
      * 获取第一条FLASH信息.
      *
@@ -30,14 +30,14 @@ if (! function_exists('get_first_flash')) {
         if ($level == 'error' && session('errors') && session('errors')->any()) {
             return session('errors')->all()[0];
         }
-        if (! session()->has($level)) {
+        if (!session()->has($level)) {
             return '';
         }
 
         return session($level)->first();
     }
 }
-if (! function_exists('menu_active')) {
+if (!function_exists('menu_active')) {
     /**
      * @param $routeName
      *
@@ -48,50 +48,13 @@ if (! function_exists('menu_active')) {
         return request()->route()->getName() == $routeName ? 'active' : '';
     }
 }
-if (! function_exists('menu_is_active')) {
-    /**
-     * 指定路由名是否与当前访问的路由名相同.
-     *
-     * @param $routeName
-     *
-     * @return bool
-     */
-    function menu_is_active(int $menuId)
-    {
-        $currentUrl = trim(request()->url());
-        $menu = \App\Models\AdministratorMenu::find($menuId);
-        if (! $menu) {
-            return false;
-        }
-        $children = $menu->children;
-        $filter = function (string $url) {
-            $url = str_replace(['index', '/index'], '', $url);
 
-            return trim($url);
-        };
-        if ($children->isEmpty()) {
-            $url = $filter($menu->url);
-
-            return preg_match("#{$url}#", $currentUrl);
-        }
-        foreach ($children as $child) {
-            $url = $filter($child->url);
-            $result = preg_match("#{$url}#", $currentUrl);
-            if ($result) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-}
-
-if (! function_exists('exception_response')) {
+if (!function_exists('exception_response')) {
     /**
      * 异常响应.
      *
      * @param Exception $exception
-     * @param string    $message
+     * @param string $message
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -104,28 +67,7 @@ if (! function_exists('exception_response')) {
     }
 }
 
-if (! function_exists('at_user')) {
-    /**
-     * 艾特某个用户.
-     *
-     * @param $content
-     * @param $fromUser
-     * @param $from
-     * @param $fromType
-     */
-    function at_user($content, $fromUser, $from, $fromType)
-    {
-        preg_match_all('/@(.*?)\s{1}/', $content, $result);
-        if (! ($result = optional($result)[1])) {
-            return;
-        }
-        foreach ($result as $item) {
-            event(new \App\Events\AtUserEvent($fromUser, $item, $from, $fromType));
-        }
-    }
-}
-
-if (! function_exists('exception_record')) {
+if (!function_exists('exception_record')) {
     /**
      * 记录异常.
      *
@@ -133,17 +75,23 @@ if (! function_exists('exception_record')) {
      */
     function exception_record(Exception $exception): void
     {
-        \Log::error([
+        $request = request();
+        $data = [
             'file' => $exception->getFile(),
             'code' => $exception->getCode(),
             'message' => $exception->getMessage(),
             'line' => $exception->getLine(),
             'trace' => $exception->getTraceAsString(),
-        ]);
+            'params' => $request->all(),
+            'url' => $request->url(),
+            'method' => $request->method(),
+            'ip' => $request->getClientIps(),
+        ];
+        \Log::error('exception', $data);
     }
 }
 
-if (! function_exists('admin')) {
+if (!function_exists('admin')) {
     /**
      * 获取当前登录的管理员.
      *
@@ -155,7 +103,7 @@ if (! function_exists('admin')) {
     }
 }
 
-if (! function_exists('markdown_to_html')) {
+if (!function_exists('markdown_to_html')) {
     /**
      * markdown转换为html.
      *
@@ -173,7 +121,7 @@ if (! function_exists('markdown_to_html')) {
     }
 }
 
-if (! function_exists('markdown_clean')) {
+if (!function_exists('markdown_clean')) {
     /**
      * 过滤markdown非法字符串.
      *
@@ -190,7 +138,7 @@ if (! function_exists('markdown_clean')) {
     }
 }
 
-if (! function_exists('image_url')) {
+if (!function_exists('image_url')) {
     /**
      * 给图片添加参数.
      *
@@ -202,11 +150,11 @@ if (! function_exists('image_url')) {
     {
         $params = config('meedu.upload.image.params', '');
 
-        return strstr('?', $url) !== false ? $url.$params : $url.'?'.$params;
+        return strstr('?', $url) !== false ? $url . $params : $url . '?' . $params;
     }
 }
 
-if (! function_exists('aliyun_play_auth')) {
+if (!function_exists('aliyun_play_auth')) {
     /**
      * 获取阿里云视频的播放Auth.
      *
@@ -214,14 +162,14 @@ if (! function_exists('aliyun_play_auth')) {
      *
      * @return mixed|SimpleXMLElement
      */
-    function aliyun_play_auth(\App\Models\Video $video)
+    function aliyun_play_auth($video)
     {
         try {
             $client = aliyun_sdk_client();
             $request = new \vod\Request\V20170321\GetVideoPlayAuthRequest();
             $request->setAcceptFormat('JSON');
             $request->setRegionId(config('meedu.upload.video.aliyun.region', ''));
-            $request->setVideoId($video->aliyun_video_id);
+            $request->setVideoId($video['aliyun_video_id']);
             $response = $client->getAcsResponse($request);
 
             return $response->PlayAuth;
@@ -233,7 +181,7 @@ if (! function_exists('aliyun_play_auth')) {
     }
 }
 
-if (! function_exists('aliyun_play_url')) {
+if (!function_exists('aliyun_play_url')) {
     /**
      * 获取阿里云的视频播放地址
      *
@@ -243,7 +191,7 @@ if (! function_exists('aliyun_play_url')) {
      */
     function aliyun_play_url(\App\Models\Video $video)
     {
-        if (! $video->aliyun_video_id) {
+        if (!$video->aliyun_video_id) {
             return [];
         }
         try {
@@ -272,7 +220,7 @@ if (! function_exists('aliyun_play_url')) {
     }
 }
 
-if (! function_exists('aliyun_sdk_client')) {
+if (!function_exists('aliyun_sdk_client')) {
     /**
      * @return DefaultAcsClient
      */
@@ -289,80 +237,7 @@ if (! function_exists('aliyun_sdk_client')) {
     }
 }
 
-if (! function_exists('backend_menus')) {
-    /**
-     * 获取当前管理员的专属菜单.
-     *
-     * @return array|mixed
-     */
-    function backend_menus()
-    {
-        $user = admin();
-        if (! $user) {
-            return collect([]);
-        }
-        if ($user->isSuper()) {
-            return (new \App\Models\AdministratorMenu())->menus();
-        }
-        $permissionIds = $user->permissionIds();
-        $permissionIds->push(0);
-        $menus = \App\Models\AdministratorMenu::with('children')
-            ->whereIn('permission_id', $permissionIds)
-            ->rootLevel()
-            ->orderAsc()
-            ->get();
-        $menus = $menus->filter(function ($menu) use ($permissionIds) {
-            if ($menu->children->isEmpty()) {
-                return false;
-            }
-            $permissionIds = $permissionIds->toArray();
-            $children = $menu->children->filter(function ($child) use ($permissionIds) {
-                return in_array($child->permission_id, $permissionIds);
-            });
-            $menu->children = $children;
-
-            return $children->count() != 0;
-        });
-
-        return $menus;
-    }
-}
-
-if (! function_exists('gen_order_no')) {
-    /**
-     * 生成订单号.
-     *
-     * @param \App\User $user
-     *
-     * @return string
-     */
-    function gen_order_no(\App\User $user)
-    {
-        $userId = str_pad($user->id, 10, 0, STR_PAD_LEFT);
-        $time = date('His');
-        $rand = mt_rand(10, 99);
-
-        return $time.$rand.$userId;
-    }
-}
-
-if (! function_exists('input_equal')) {
-    /**
-     * GET参数是否等于指定值
-     *
-     * @param $field
-     * @param $value
-     * @param string $default
-     *
-     * @return bool
-     */
-    function input_equal($field, $value, $default = '')
-    {
-        return request()->input($field, $default) == $value;
-    }
-}
-
-if (! function_exists('v')) {
+if (!function_exists('v')) {
     /**
      * 重写视图.
      *
@@ -374,13 +249,13 @@ if (! function_exists('v')) {
     function v($viewName, $params = [])
     {
         $namespace = config('meedu.system.theme.use', 'default');
-        $viewName = preg_match('/::/', $viewName) ? $viewName : $namespace.'::'.$viewName;
+        $viewName = preg_match('/::/', $viewName) ? $viewName : $namespace . '::' . $viewName;
 
         return view($viewName, $params);
     }
 }
 
-if (! function_exists('duration_humans')) {
+if (!function_exists('duration_humans')) {
     /**
      * @param $duration
      *
@@ -404,28 +279,7 @@ if (! function_exists('duration_humans')) {
     }
 }
 
-if (! function_exists('view_num_humans')) {
-    /**
-     * @param $num
-     *
-     * @return string
-     */
-    function view_num_humans($num)
-    {
-        if ($num instanceof \App\Models\Video) {
-            $num = $num->view_num;
-        }
-        if ($num < 1000) {
-            return $num;
-        } elseif ($num < 10000) {
-            return intdiv($num, 1000).'k次';
-        }
-
-        return intdiv($num, 10000).'w次';
-    }
-}
-
-if (! function_exists('enabled_socialites')) {
+if (!function_exists('enabled_socialites')) {
     /**
      * 获取已启用的第三方登录.
      *
@@ -442,17 +296,21 @@ if (! function_exists('enabled_socialites')) {
     }
 }
 
-if (! function_exists('get_payments')) {
+if (!function_exists('get_payments')) {
     /**
      * 获取可用的Payment.
      *
      * @return \Illuminate\Support\Collection
      */
-    function get_payments()
+    function get_payments($scene)
     {
-        $payments = collect(config('meedu.payment'))->filter(function ($payment) {
+        /**
+         * @var \App\Services\Base\Services\ConfigService
+         */
+        $configService = app()->make(\App\Services\Base\Services\ConfigService::class);
+        $payments = collect($configService->getPayments())->filter(function ($payment) use ($scene) {
             $enabled = $payment['enabled'] ?? false;
-            $pc = $payment['pc'] ?? false;
+            $pc = $payment[$scene] ?? false;
 
             return $enabled && $pc;
         });
@@ -461,7 +319,7 @@ if (! function_exists('get_payments')) {
     }
 }
 
-if (! function_exists('app_menu_is_active')) {
+if (!function_exists('app_menu_is_active')) {
     function app_menu_is_active($menu)
     {
         $request = request();
@@ -484,7 +342,7 @@ if (! function_exists('app_menu_is_active')) {
             ],
         ];
         $menus = $const[$menu] ?? [];
-        if (! $menus) {
+        if (!$menus) {
             return false;
         }
         if ($request->routeIs(...$menus)) {
@@ -492,5 +350,20 @@ if (! function_exists('app_menu_is_active')) {
         }
 
         return false;
+    }
+}
+
+if (!function_exists('get_at_users')) {
+    /**
+     * @param string $content
+     * @return array
+     */
+    function get_at_users(string $content): array
+    {
+        preg_match_all('/@(.*?)\s{1}/', $content, $result);
+        if (count($result[1] ?? []) == 0) {
+            return [];
+        }
+        return $result[1];
     }
 }

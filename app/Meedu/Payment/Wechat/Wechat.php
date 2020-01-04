@@ -12,37 +12,64 @@
 namespace App\Meedu\Payment\Wechat;
 
 use Exception;
-use App\Models\Order;
 use Yansongda\Pay\Pay;
+use App\Constant\FrontendConstant;
 use App\Events\PaymentSuccessEvent;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Cache;
 use App\Meedu\Payment\Contract\Payment;
+use App\Services\Base\Services\CacheService;
 use App\Meedu\Payment\Contract\PaymentStatus;
+use App\Services\Base\Services\ConfigService;
+use App\Services\Order\Services\OrderService;
+use App\Services\Base\Interfaces\CacheServiceInterface;
+use App\Services\Base\Interfaces\ConfigServiceInterface;
+use App\Services\Order\Interfaces\OrderServiceInterface;
 
 class Wechat implements Payment
 {
-    public function create(Order $order): PaymentStatus
+    /**
+     * @var ConfigService
+     */
+    protected $configService;
+    /**
+     * @var OrderService
+     */
+    protected $orderService;
+    /**
+     * @var CacheService
+     */
+    protected $cacheService;
+
+    public function __construct(
+        ConfigServiceInterface $configService,
+        OrderServiceInterface $orderService,
+        CacheServiceInterface $cacheService
+    ) {
+        $this->configService = $configService;
+        $this->orderService = $orderService;
+        $this->cacheService = $cacheService;
+    }
+
+    public function create(array $order): PaymentStatus
     {
         try {
             $payOrderData = [
-                'out_trade_no' => $order->order_id,
-                'total_fee' => $order->charge * 100,
-                'body' => $order->getOrderListTitle(),
+                'out_trade_no' => $order['order_id'],
+                'total_fee' => $order['charge'] * 100,
+                'body' => $order['order_id'],
                 'openid' => '',
             ];
-            $createResult = Pay::wechat(config('pay.wechat'))
-                ->{$order->payment_method}($payOrderData);
+            $createResult = Pay::wechat($this->configService->getWechatPay())->{$order['payment_method']}($payOrderData);
 
             // 缓存保存
-            Cache::put(
-                sprintf(config('cachekey.order.wechat_remote_order.name'), $order->order_id),
+            $this->cacheService->put(
+                sprintf(FrontendConstant::PAYMENT_WECHAT_PAY_CACHE_KEY, $order['order_id']),
                 $createResult,
-                config('cachekey.order.wechat_remote_order.expire')
+                FrontendConstant::PAYMENT_WECHAT_PAY_CACHE_EXPIRE
             );
 
             // 构建Response
-            $response = redirect(route('order.pay.wechat', [$order->order_id]));
+            $response = redirect(route('order.pay.wechat', [$order['order_id']]));
 
             return new PaymentStatus(true, $response);
         } catch (Exception $exception) {
@@ -53,13 +80,11 @@ class Wechat implements Payment
     }
 
     /**
-     * 主动轮询.
-     *
-     * @param Order $order
+     * @param array $order
      *
      * @return PaymentStatus
      */
-    public function query(Order $order): PaymentStatus
+    public function query(array $order): PaymentStatus
     {
     }
 
@@ -70,31 +95,31 @@ class Wechat implements Payment
      */
     public function callback()
     {
-        $pay = Pay::wechat(config('pay.wechat'));
+        $pay = Pay::wechat($this->configService->getWechatPay());
 
         try {
             $data = $pay->verify();
             Log::info($data);
 
-            $order = Order::whereOrderId($data['out_trade_no'])->firstOrFail();
+            $order = $this->orderService->find($data['out_trade_no']);
 
             event(new PaymentSuccessEvent($order));
+
+            return $pay->success();
         } catch (Exception $e) {
             exception_record($e);
-        }
 
-        return $pay->success();
+            return $e->getMessage();
+        }
     }
 
     /**
-     * 支付URL.
+     * @param array $order
      *
-     * @param Order $order
-     *
-     * @return mixed|string
+     * @return string
      */
-    public static function payUrl(Order $order): string
+    public static function payUrl(array $order): string
     {
-        return route('order.pay.wechat', [$order->order_id]);
+        return route('order.pay.wechat', [$order['order_id']]);
     }
 }

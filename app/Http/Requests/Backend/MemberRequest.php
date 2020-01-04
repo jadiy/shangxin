@@ -12,10 +12,8 @@
 namespace App\Http\Requests\Backend;
 
 use App\User;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Hash;
 
-class MemberRequest extends FormRequest
+class MemberRequest extends BaseRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -60,8 +58,7 @@ class MemberRequest extends FormRequest
             'avatar' => $this->post('avatar'),
             'nick_name' => $this->post('nick_name'),
             'mobile' => $this->post('mobile'),
-//            'password' => bcrypt($this->post('password')),
-            'password' => Hash::make($this->post('password')),
+            'password' => bcrypt($this->post('password')),
             'is_active' => User::ACTIVE_YES,
         ];
     }

@@ -12,18 +12,25 @@
 namespace App\Exceptions;
 
 use Exception;
+use Illuminate\Support\Str;
+use App\Constant\ApiV2Constant;
+use App\Constant\BackendApiConstant;
+use Illuminate\Auth\AuthenticationException;
+use App\Http\Controllers\Frontend\Traits\JsonResponseTrait;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
 {
+    use JsonResponseTrait;
+
     /**
      * A list of the exception types that are not reported.
      *
      * @var array
      */
     protected $dontReport = [
-        MeeduErrorResponseJsonException::class,
-        ApiV1Exception::class,
+        ApiV2Exception::class,
+        ServiceException::class,
     ];
 
     /**
@@ -52,15 +59,35 @@ class Handler extends ExceptionHandler
      * Render an exception into an HTTP response.
      *
      * @param \Illuminate\Http\Request $request
-     * @param \Exception               $exception
+     * @param \Exception $exception
      *
      * @return \Illuminate\Http\Response
      */
     public function render($request, Exception $exception)
     {
         if ($request->wantsJson()) {
-            return exception_response($exception);
+            // 后台的异常错误
+            if (Str::contains($request->getUri(), '/backend/api/v1')) {
+                $code = BackendApiConstant::ERROR_CODE;
+                $exception instanceof AuthenticationException && $code = BackendApiConstant::NO_AUTH_CODE;
+                return response()->json([
+                    'status' => $code,
+                    'message' => $exception->getMessage(),
+                ]);
+            }
+            if (!($exception instanceof ApiV2Exception)) {
+                // apiV2异常错误
+                if (Str::contains($request->getUri(), '/api/v2')) {
+                    $code = ApiV2Constant::ERROR_CODE;
+                    $exception instanceof AuthenticationException && $code = ApiV2Constant::ERROR_NO_AUTH_CODE;
+                    return response()->json([
+                        'code' => $code,
+                        'message' => __('error'),
+                    ]);
+                }
+            }
         }
+
 
         return parent::render($request, $exception);
     }

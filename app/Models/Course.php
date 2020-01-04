@@ -81,7 +81,7 @@ class Course extends Model
 
     protected $fillable = [
         'user_id', 'title', 'slug', 'thumb', 'charge',
-        'short_description', 'description', 'seo_keywords',
+        'short_description', 'original_desc', 'render_desc', 'seo_keywords',
         'seo_description', 'published_at', 'is_show',
     ];
 
@@ -349,5 +349,15 @@ class Course extends Model
         ]));
 
         return $comment;
+    }
+
+    /**
+     * 获取是否显示状态，显示返回真
+     *
+     * @return bool
+     */
+    public function getIsShow()
+    {
+        return $this->is_show == self::SHOW_YES;
     }
 }

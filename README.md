@@ -6,7 +6,9 @@
 <a href="https://packagist.org/packages/Qsnh/meedu"><img src="https://poser.pugx.org/qsnh/meedu/v/stable.svg" alt="Latest Stable Version"></a>
 <a href="https://packagist.org/packages/Qsnh/meedu"><img src="https://poser.pugx.org/qsnh/meedu/downloads" alt="Total Downloads"></a>
 <a href="https://packagist.org/packages/Qsnh/meedu"><img src="https://poser.pugx.org/qsnh/meedu/license" alt="License"></a>
-<a href="https://scrutinizer-ci.com/g/Qsnh/meedu/build-status/master"><img src="https://scrutinizer-ci.com/g/Qsnh/meedu/badges/coverage.png?b=master" alt="Code Coverage"></a>
+<a href="https://codecov.io/gh/Qsnh/meedu">
+  <img src="https://codecov.io/gh/Qsnh/meedu/branch/master/graph/badge.svg" />
+</a>
 </p>
 
 ## 介绍
@@ -18,7 +20,8 @@
 - [MeEdu 作者录制的简单安装视频教程](https://www.bilibili.com/video/av36024146/)  
 - [使用Docker简单快速的搭建MeEdu（适合小白）](https://www.bilibili.com/video/av44963351/)
 - [MeEdu使用阿里云视频加密服务保障视频安全性(手把手教程)](https://www.bilibili.com/video/av45755754/)
-- [一条命令安装MeEdu（Docker方式），由 MeEdu 社区小伙伴提供](https://github.com/Baiyuetribe/meedu)
+
+> 作者提供收费安装/升级服务，一次安装/升级的价格为27元=一杯咖啡。如果您有需要加我微信，备注"安装meedu"，我会及时与您联系。联系方式下拉到底部。
 
 ## 使用站点
 
@@ -28,6 +31,7 @@
 | [青萍教育](http://www.qingpingjiaoyu.com/) | `http://www.qingpingjiaoyu.com` |
 | [聆鹿故事](http://edu.ilinglu.cn/) | `http://edu.ilinglu.cn` |
 | **生活趣学堂** | 微信公众号：生活趣学堂 |
+| [Seekdeer(K线教学)](http://www.seekdeer.com/) | `http://www.seekdeer.com/` |
 
 ## 有哪些企业在使用
 
@@ -36,7 +40,7 @@
     <tr>
       <td align="center" valign="middle">
         <a href="https://video.heyhighschool.com?from=meedu_github" target="_blank" title="上海高育教育科技有限公司">
-          <img width="222px" title="上海高育教育科技有限公司" src="https://user-images.githubusercontent.com/12671205/60409095-92e02780-9bf4-11e9-8cf6-cb6b75a718f3.jpg">
+          <img width="100px" title="上海高育教育科技有限公司" src="https://user-images.githubusercontent.com/12671205/60409095-92e02780-9bf4-11e9-8cf6-cb6b75a718f3.jpg">
         </a>
       </td>
     </tr><tr></tr>
@@ -46,25 +50,25 @@
 ## 当前功能概览
 
 - [x] [微信小程序](https://github.com/YTU94/meedu-wxapp)
-- [x] 视频在线点播
+- [x] 视频在线点播/视频加密播放
 - [x] 手机号注册
-- [x] 会员/单独购买两种收费模式
+- [x] 会员/课程单独购买两种收费模式
 - [x] 站内消息
-- [x] 支付宝支付/微信支付/个人收款方案(微信小微商户)
+- [x] 支付宝支付/微信支付/手动转账
 - [x] 单元测试
 - [x] 系统公告
 - [x] SEO优化
 - [x] 数据定时备份
 - [x] 友情链接
-- [x] QQ登录
-- [x] Github登录
+- [x] QQ登录/Github登录/微信登录
 - [x] 插件系统
+- [x] Swagger Api文档管理
 
 ## FAQ
 
-- [API接口](docs/api/v1/README.md)
+- [API接口](https://meedu-v2-xiaoteng.doc.coding.io/)
 - [安装教程](docs/安装教程.md)
-- [MeEdu系统视频收费规则细节](docs/收费规则.md)
+- [MeEdu使用教程](docs/使用教程.md)
 
 ## License
 
@@ -79,9 +83,17 @@
 | `Baiyuetribe` | [https://github.com/Baiyuetribe](https://github.com/Baiyuetribe) |
 | `Ron.wiki` | [http://ron.wiki](http://ron.wiki) |
 
-## 交流群
+## 捐赠
 
 <p>
-<img src="https://s1.ax1x.com/2018/09/29/ilrWvt.jpg" width=300>
-<img src="https://s1.ax1x.com/2018/09/29/ilrhKP.png" width=300>
+<img src="/docs/contact/BTC钱包.png" width=200>
+<img src="/docs/contact/ETH钱包.png" width=200>
+<img src="/docs/contact/EOS钱包.png" width=200>
+</p>
+
+## 联系我们
+
+<p>
+<img src="/docs/contact/qq群.png" width=200>
+<img src="/docs/contact/wechat.png" width=200>
 </p>
