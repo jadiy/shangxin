@@ -38,7 +38,7 @@ class SmsController extends FrontendController
         } catch (Exception $exception) {
             exception_record($exception);
 
-            return exception_response($exception, __('error'));
+            return $this->error(__('error'));
         }
     }
 
@@ -57,6 +57,11 @@ class SmsController extends FrontendController
         return $this->sendHandler($mobile, 'sms_mobile_bind', 'mobile_bind');
     }
 
+    public function sendMobileLogin($mobile)
+    {
+        return $this->sendHandler($mobile, 'sms_mobile_login', 'login');
+    }
+
     /**
      * @param $mobile
      * @param $sessionKey
@@ -69,11 +74,11 @@ class SmsController extends FrontendController
      */
     protected function sendHandler($mobile, $sessionKey, $templateId)
     {
-        $code = mt_rand(1000, 10000);
+        $code = random_int(1000, 10000);
         session([$sessionKey => $code]);
 
         $this->smsService->sendCode($mobile, $code, $templateId);
 
-        return $this->jsonSuccess();
+        return $this->success();
     }
 }

@@ -12,7 +12,7 @@
 namespace App\Models;
 
 use Illuminate\Http\Request;
-use Laravel\Passport\HasApiTokens;
+use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -29,7 +29,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
  * @property string|null                                                                                               $remember_token
  * @property \Illuminate\Support\Carbon|null                                                                           $created_at
  * @property \Illuminate\Support\Carbon|null                                                                           $updated_at
- * @property \Illuminate\Database\Eloquent\Collection|\App\Models\Announcement[]                                       $announcements
  * @property mixed                                                                                                     $destroy_url
  * @property mixed                                                                                                     $edit_url
  * @property \Illuminate\Notifications\DatabaseNotificationCollection|\Illuminate\Notifications\DatabaseNotification[] $notifications
@@ -86,7 +85,7 @@ class Administrator extends Authenticatable implements JWTSubject
         $data = [
             'name' => $request->input('name'),
             'email' => $request->input('email'),
-            'password' => bcrypt($request->input('password')),
+            'password' => Hash::make($request->input('password')),
             'last_login_ip' => '',
             'last_login_date' => '',
         ];
@@ -134,14 +133,6 @@ class Administrator extends Authenticatable implements JWTSubject
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\HasMany
-     */
-    public function announcements()
-    {
-        return $this->hasMany(Announcement::class, 'admin_id');
-    }
-
-    /**
      * 获取当前管理员用户下的所有权限ID.
      *
      * @return array|\Illuminate\Support\Collection
@@ -149,7 +140,7 @@ class Administrator extends Authenticatable implements JWTSubject
     public function permissionIds()
     {
         $roles = $this->roles;
-        if (! $roles) {
+        if (!$roles) {
             return [];
         }
         $permissionIds = collect([]);
@@ -191,7 +182,7 @@ class Administrator extends Authenticatable implements JWTSubject
                 break;
             }
         }
-        if (! $existsPermission) {
+        if (!$existsPermission) {
             return false;
         }
 

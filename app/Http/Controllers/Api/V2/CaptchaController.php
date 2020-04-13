@@ -20,6 +20,10 @@ use App\Services\Base\Services\ConfigService;
 use App\Services\Other\Interfaces\SmsServiceInterface;
 use App\Services\Base\Interfaces\ConfigServiceInterface;
 
+/**
+ * Class CaptchaController
+ * @package App\Http\Controllers\Api\V2
+ */
 class CaptchaController extends BaseController
 {
 
@@ -50,6 +54,7 @@ class CaptchaController extends BaseController
      * @OA\Post(
      *     path="/captcha/image",
      *     summary="图形验证码",
+     *     tags={"其它"},
      *     @OA\Response(
      *         description="",response=200,
      *         @OA\JsonContent(
@@ -75,9 +80,11 @@ class CaptchaController extends BaseController
      * @OA\Post(
      *     path="/captcha/sms",
      *     summary="发送手机验证码",
+     *     tags={"其它"},
      *     @OA\RequestBody(description="",@OA\JsonContent(
      *         @OA\Property(property="mobile",description="手机号",type="string"),
-     *         @OA\Property(property="mobile_code",description="手机验证码",type="string"),
+     *         @OA\Property(property="image_captcha",description="图形验证码",type="string"),
+     *         @OA\Property(property="image_key",description="图形验证码key",type="string"),
      *         @OA\Property(property="scene",description="scene[login:登录,register:注册,password_reset:密码重置]",type="string"),
      *     )),
      *     @OA\Response(
@@ -89,7 +96,9 @@ class CaptchaController extends BaseController
      *         )
      *     )
      * )
+     *
      * @param SmsRequest $request
+     * @return \Illuminate\Http\JsonResponse
      * @throws \App\Exceptions\ApiV2Exception
      * @throws \Overtrue\EasySms\Exceptions\InvalidArgumentException
      * @throws \Overtrue\EasySms\Exceptions\NoGatewayAvailableException
@@ -98,9 +107,9 @@ class CaptchaController extends BaseController
     {
         $this->checkImageCaptcha();
         ['mobile' => $mobile, 'scene' => $scene] = $request->filldata();
-        $code = str_pad(mt_rand(0, 999999), 6, 0, STR_PAD_LEFT);
+        $code = str_pad(random_int(0, 999999), 6, 0, STR_PAD_LEFT);
         $this->smsService->sendCode($mobile, $code, $scene);
-        $this->cacheService->put(sprintf(ApiV2Constant::MOBILE_OR_PASSWORD_ERROR, $mobile), $code, ApiV2Constant::SMS_CODE_EXPIRE);
-        $this->success();
+        $this->cacheService->put(sprintf(ApiV2Constant::MOBILE_CODE_CACHE_KEY, $mobile), $code, ApiV2Constant::SMS_CODE_EXPIRE);
+        return $this->success();
     }
 }

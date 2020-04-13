@@ -1,184 +1,126 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="keywords" content="{{$keywords ?? ''}}">
-    <meta name="description" content="{{$description ?? ''}}">
-    <title>{{Auth::check() ? $user['nick_name'].' - ' : ''}}{{$title ?? 'MeEdu'}}</title>
-    <!-- Styles -->
-    <link href="{{asset('/frontend/assets/css/core.min.css')}}" rel="stylesheet">
-    <link href="{{asset('/frontend/assets/css/app.min.css')}}" rel="stylesheet">
-    <link href="{{asset('/frontend/assets/css/style.min.css')}}" rel="stylesheet">
-    <link crossorigin="anonymous" integrity="sha384-6SClQBVFSY83VyPkr36mKEIuaHcXN69N5F076i0mYvEIsVK73AlDn/6vL2PyunVW" href="//lib.baomitu.com/limonte-sweetalert2/7.33.1/sweetalert2.min.css" rel="stylesheet">
-    @yield('css')
-</head>
-<body style="padding-top: 64px;">
+@include('layouts.common.header')
+<body>
 
-<header class="topbar topbar-unfix">
-    <div class="topbar-left">
-        <span class="topbar-brand">
-            <a href="{{route('index')}}"><img src="{{asset('/frontend/logo.png')}}" alt="logo-icon"></a>
-        </span>
-        <div class="topbar-divider d-none d-xl-block"></div>
-        <nav class="topbar-navigation">
-            <ul class="menu">
-                <li class="menu-item {{app_menu_is_active('index') ? 'active' : ''}}">
-                    <a class="menu-link" href="{{url('/')}}">
-                        <span class="icon ti-home"></span>
-                        <span class="title">首页</span>
-                    </a>
-                </li>
-                <li class="menu-item {{app_menu_is_active('courses') ? 'active' : ''}}">
-                    <a class="menu-link" href="{{route('courses')}}">
-                        <span class="icon ti-headphone-alt"></span>
-                        <span class="title">课程</span>
-                    </a>
-                </li>
-                <li class="menu-item {{app_menu_is_active('role') ? 'active' : ''}}">
-                    <a class="menu-link" href="{{route('role.index')}}">
-                        <span class="icon ti-gift"></span>
-                        <span class="title">订阅</span>
-                    </a>
-                </li>
-                @foreach($gNavs as $item)
-                    <li class="menu-item">
-                        <a class="menu-link" href="{{$item['url']}}"><span class="title">{{$item['name']}}</span></a>
-                    </li>
-                @endforeach
-            </ul>
-        </nav>
-    </div>
-    <div class="topbar-right">
-        <ul class="topbar-btns">
-            <li class="dropdown">
-                <span class="topbar-btn" data-toggle="dropdown">
-                    @guest
-                    <img class="avatar" src="/frontend/assets/img/avatar/1.jpg">
-                    @else
-                    <img class="avatar" src="{{$user['avatar']}}">
-                    @endguest
-                </span>
-                <div class="dropdown-menu dropdown-menu-right">
-                    @guest
-                        <a class="dropdown-item" href="{{ route('login') }}"><i class="ti-user"></i> 登录</a>
-                        <a class="dropdown-item" href="{{ route('register') }}"><i class="ti-user"></i> 注册</a>
-                        @else
-                        <a class="dropdown-item" href="{{ route('member') }}"><i class="ti-user"></i> 会员中心</a>
-                        <a class="dropdown-item" href="{{ route('logout') }}"
-                           onclick="event.preventDefault();
+<div class="container-fluid nav-box bg-fff">
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="container">
+                <div class="row">
+                    <div class="col-sm-12">
+                        <nav class="navbar navbar-expand-lg bg-fff">
+                            <a class="navbar-brand" href="{{url('/')}}">
+                                <img src="{{$gConfig['system']['logo']}}" height="37" alt="{{config('app.name')}}">
+                            </a>
+                            <button class="navbar-toggler" type="button" data-toggle="collapse"
+                                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                                    aria-expanded="false" aria-label="Toggle navigation">
+                                <i class="fa fa-bars"></i>
+                            </button>
+
+                            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                                <ul class="navbar-nav mr-auto">
+                                    <li class="nav-item active">
+                                        <a class="nav-link {{menu_active(['index'])}}" href="{{url('/')}}">首页 <span
+                                                    class="sr-only">(current)</span></a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link {{menu_active(['courses', 'videos', 'course.show', 'video.show'])}}"
+                                           href="{{route('courses')}}">所有课程</a>
+                                    </li>
+                                    @foreach($gNavs as $item)
+                                        <li class="nav-item">
+                                            <a class="nav-link {{request()->url() == $item['url'] ? 'active' : ''}}"
+                                               href="{{$item['url']}}">{{$item['name']}}</a>
+                                        </li>
+                                    @endforeach
+                                    <form class="form-inline ml-4" method="get" action="{{route('search')}}">
+                                        @csrf
+                                        <div class="input-group">
+                                            <input type="text" class="form-control search-input" name="keywords"
+                                                   placeholder="请输入关键字"
+                                                   required>
+                                            <div class="input-group-append">
+                                                <button class="btn btn-primary search-button" type="submit">
+                                                    <i class="fa fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </ul>
+
+                                <a class="role-vip-button {{menu_active('role.index')}}"
+                                   href="{{route('role.index')}}">
+                                    <p><img src="/images/icons/vip.png" width="24" height="24"></p>
+                                    <p>会员中心</p>
+                                </a>
+
+                                @if(!$user)
+                                    <a class="login-button login-auth" href="{{route('login')}}" data-login="0">登录</a>
+                                @else
+                                    {{--                                    <a class="message-button {{menu_active('member.messages')}}"--}}
+                                    {{--                                       href="{{route('member.messages')}}">--}}
+                                    {{--                                        <p><img src="/images/icons/message.png" width="24" height="24"></p>--}}
+                                    {{--                                        <p>消息</p>--}}
+                                    {{--                                        @if($gUnreadMessageCount)--}}
+                                    {{--                                            <span class="message-count">{{$gUnreadMessageCount}}</span>--}}
+                                    {{--                                        @endif--}}
+                                    {{--                                    </a>--}}
+                                    <div class="dropdown user-avatar">
+                                        <a class="user-avatar-button" href="javascript:void(0);"
+                                           id="navbarDropdown"
+                                           role="button"
+                                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <img src="{{$user['avatar']}}" width="40" height="40">
+                                        </a>
+                                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                                            @if(app()->make(\App\Businesses\BusinessState::class)->isRole($user))
+                                                <a class="dropdown-item vip"
+                                                   href="{{route('member.join_role_records')}}">
+                                                    <img src="/images/icons/vip.png" width="20"
+                                                         height="20"><span>{{$user['role']['name']}}</span>
+                                                </a>
+                                            @else
+                                                <a class="dropdown-item vip" href="{{route('role.index')}}">
+                                                    <img src="/images/icons/vip.png" width="20"
+                                                         height="20"><span>成为会员</span>
+                                                </a>
+                                            @endif
+                                            <a class="dropdown-item" href="{{route('member')}}">
+                                                <img src="{{$user['avatar']}}" width="20" class="avatar"
+                                                     height="20"><span>用户中心</span>
+                                            </a>
+                                            <a class="dropdown-item" href="{{route('member.courses')}}">
+                                                <img src="/images/icons/course.png" width="20"
+                                                     height="20"><span>我的课程</span>
+                                            </a>
+                                            <a class="dropdown-item" href="{{route('member.orders')}}">
+                                                <img src="/images/icons/order.png" width="20"
+                                                     height="20"><span>订单信息</span>
+                                            </a>
+                                            <a class="dropdown-item logout" href="javascript:void(0);" onclick="event.preventDefault();
                                                              document.getElementById('logout-form').submit();">
-                            <i class="ti-power-off"></i> 安全退出
-                        </a>
-                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                            @csrf
-                        </form>
-                        @endguest
+                                                <img src="/images/icons/logout.png" width="20" height="20">
+                                                <span>安全退出</span>
+                                            </a>
+                                            <form class="d-none" id="logout-form" action="{{ route('logout') }}"
+                                                  method="POST"
+                                                  style="display: none;">
+                                                @csrf
+                                            </form>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+                        </nav>
+                    </div>
                 </div>
-            </li>
-            @auth
-            <li class="d-none d-md-block">
-                <a  href="{{route('member.messages')}}" class="topbar-btn {{ $gUnreadMessageCount > 0 ? 'has-new' : '' }}">
-                    <i class="ti-bell"></i>
-                </a>
-            </li>
-            @endauth
-        </ul>
+            </div>
+        </div>
     </div>
-</header>
+</div>
 
 @yield('content')
 
-<footer class="site-footer pt-50 pb-20">
-    <div class="container">
-        <div class="row gap-y">
-            <div class="col-md-3 col-sm-12">
-                <h5 class="text-uppercase fs-14 ls-1">关于我们</h5>
-                <p class="text-justify">
-                    MeEdu 是专为为个人开发的开源免费的在线点播系统。使用 MeEdu 你可以在短短几分钟之内搭建一个功能完善的在线教育系统。MeEdu 专注视频
-                    的付费点播，结合丰富插件足以满足您的任何要求。
-                </p>
-            </div>
-
-        <div class="col-6 col-md-4 col-lg-2 text-left1 text-lg-center1">
-            <h5 class="text-uppercase fs-14 ls-1">尚芯</h5>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">官网</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">Bug反馈</a>
-                </li>
-            </ul>
-        </div>
-
-        <div class="col-6 col-md-4 col-lg-2 text-left1 text-lg-center1">
-            <h5 class="text-uppercase fs-14 ls-1">服务支持</h5>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">小程序</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">公众号</a>
-                </li>
-            </ul>
-        </div>
-
-        <div class="col-6 col-md-4 col-lg-2 text-left1 text-lg-center1">
-            <h5 class="text-uppercase fs-14 ls-1">使用帮助</h5>
-            <ul class="nav flex-column">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">课程</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">注册</a>
-                </li>
-            </ul>
-
-        </div>
-
-        <hr>
-
-
-    <div class="row">
-        <div class="col-md-6 justify-content-center justify-content-md-start">
-            <p> 2019 <a href="http://www.beian.miit.gov.cn"> 湘ICP备15019816号	</a>. .</p>
-        </div>
-
-        <div class="col-md-6">
-            <ul class="nav nav-primary nav-dotted nav-dot-separated justify-content-center justify-content-md-end">
-                <li class="nav-item">
-                    <a class="nav-link" href="#">更多</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="#">小程序</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-    </div>
-</footer>
-
-
-<!-- Scripts -->
-<script src="{{asset('/frontend/assets/js/core.min.js')}}"></script>
-<script src="{{asset('/frontend/assets/js/app.min.js')}}"></script>
-<script src="{{asset('/frontend/assets/js/script.min.js')}}"></script>
-<script crossorigin="anonymous" integrity="sha384-yhphg78T9x4D5MygsNWDAL6NRy6UurEwbp81HAeiKaBIh7rUi1+BIwJMlYJuPBlW" src="//lib.baomitu.com/limonte-sweetalert2/7.33.1/sweetalert2.min.js"></script>
-<script>
-    @if(get_first_flash('success'))
-    swal("成功", "{{get_first_flash('success')}}", "success");
-    @endif
-    @if(get_first_flash('warning'))
-    swal("警告", "{{get_first_flash('warning')}}", "warning");
-    @endif
-    @if(get_first_flash('error'))
-    swal("错误", "{{get_first_flash('error')}}", "error");
-    @endif
-</script>
-@yield('js')
-<div style="display:none">{!! config('meedu.system.js') !!}</div>
+@include('layouts.common.footer')
 </body>
 </html>

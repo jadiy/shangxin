@@ -28,6 +28,7 @@ class Setting
 
     /**
      * @param $param
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
      */
     public function save($param)
     {
@@ -40,20 +41,35 @@ class Setting
     }
 
     /**
+     * @param $params
+     * @throws \Illuminate\Contracts\Filesystem\FileNotFoundException
+     */
+    public function append($params)
+    {
+        foreach ($params as $key => $item) {
+            config([$key => $item]);
+        }
+        $this->put($this->getCanEditConfig());
+    }
+
+    /**
      * 自定义配置同步到Laravel系统中.
      */
     public function sync()
     {
         $saveConfig = $this->get();
-        if (! isset($saveConfig['version'])) {
+        if (!isset($saveConfig['version'])) {
             // 老版本的配置保存方式
             collect($this->get())->map(function ($item, $key) {
                 config([$key => $item]);
             });
         } else {
             // v1版本的配置保存方式
-            if ($saveConfig['version'] == self::VERSION) {
-                config($saveConfig);
+            if ((int)$saveConfig['version'] === self::VERSION) {
+                $arr = array_compress($saveConfig);
+                foreach ($arr as $key => $item) {
+                    config([$key => $item]);
+                }
             }
         }
         $this->specialSync();
@@ -77,11 +93,6 @@ class Setting
      */
     public function put(array $setting): void
     {
-//        $config = $this->files->exists($this->dist) ? $this->files->get($this->dist) : [];
-//        if ($config) {
-//            $config = json_decode($config, true);
-//            $setting = array_merge($config, $setting);
-//        }
         $this->files->put($this->dist, json_encode($setting));
     }
 
@@ -94,12 +105,31 @@ class Setting
      */
     public function get(): array
     {
-        if (! $this->files->exists($this->dist)) {
+        if (!$this->files->exists($this->dist)) {
             return [];
         }
         $jsonContent = $this->files->get($this->dist);
         $arrayContent = json_decode($jsonContent, true);
 
         return $arrayContent;
+    }
+
+    /**
+     * 获取可以编辑的配置
+     * @return array
+     */
+    public function getCanEditConfig(): array
+    {
+        $meedu = config('meedu');
+        $config = [
+            'app' => config('app'),
+            'meedu' => $meedu,
+            'sms' => config('sms'),
+            'services' => config('services'),
+            'pay' => config('pay'),
+            'tencent' => config('tencent'),
+            'filesystems' => config('filesystems'),
+        ];
+        return $config;
     }
 }

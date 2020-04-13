@@ -32,6 +32,9 @@ class OrderTimeoutHandlerCommand extends Command
      */
     protected $description = 'order pay timeout.';
 
+    /**
+     * @var OrderService
+     */
     protected $orderService;
 
     /**
@@ -46,16 +49,14 @@ class OrderTimeoutHandlerCommand extends Command
     }
 
     /**
-     * Execute the console command.
-     *
-     * @return mixed
+     * @throws \App\Exceptions\ServiceException
      */
     public function handle()
     {
         // 超时一个小时未支付订单
         $now = Carbon::now()->subMinutes(60);
         $orders = $this->orderService->getTimeoutOrders($now->toString());
-        if (! $orders) {
+        if (!$orders) {
             return;
         }
         foreach ($orders as $order) {

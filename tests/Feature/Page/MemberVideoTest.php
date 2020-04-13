@@ -7,8 +7,6 @@ use App\Services\Member\Models\User;
 use App\Services\Member\Models\UserVideo;
 use Carbon\Carbon;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class MemberVideoTest extends TestCase
 {
@@ -28,7 +26,7 @@ class MemberVideoTest extends TestCase
             'published_at' => Carbon::now()->subDays(1),
         ]);
         $user = factory(User::class)->create();
-        $charge = mt_rand(1, 100);
+        $charge = random_int(1, 100);
         UserVideo::create([
             'user_id' => $user->id,
             'video_id' => $video->id,

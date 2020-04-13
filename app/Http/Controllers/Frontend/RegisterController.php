@@ -11,7 +11,6 @@
 
 namespace App\Http\Controllers\Frontend;
 
-use App\Events\UserRegisterEvent;
 use App\Http\Controllers\BaseController;
 use App\Services\Member\Services\UserService;
 use App\Http\Requests\Frontend\RegisterPasswordRequest;
@@ -28,6 +27,7 @@ class RegisterController extends BaseController
     public function __construct(UserServiceInterface $userService)
     {
         $this->userService = $userService;
+        $this->middleware('guest');
     }
 
     /**
@@ -35,7 +35,7 @@ class RegisterController extends BaseController
      */
     public function showRegisterPage()
     {
-        return v('auth.register');
+        return v('frontend.auth.register');
     }
 
     /**
@@ -51,7 +51,7 @@ class RegisterController extends BaseController
         ] = $request->filldata();
         $user = $this->userService->findNickname($nickname);
         if ($user) {
-            flash(__('nickname.unique'));
+            flash(__('nick_name.unique'));
             return back();
         }
         $user = $this->userService->findMobile($mobile);

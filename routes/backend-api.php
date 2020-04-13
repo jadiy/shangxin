@@ -7,6 +7,7 @@ Route::group(['middleware' => ['auth:administrator']], function () {
     Route::get('/user', 'LoginController@user');
 
     Route::get('/dashboard', 'DashboardController@index');
+    Route::get('/dashboard/system/info', 'DashboardController@systemInfo');
 
     Route::group(['prefix' => 'video/token'], function () {
         Route::post('/tencent', 'VideoUploadController@tencentToken');
@@ -21,6 +22,15 @@ Route::group(['middleware' => ['auth:administrator']], function () {
         Route::get('/{id}', 'LinkController@edit');
         Route::put('/{id}', 'LinkController@update');
         Route::delete('/{id}', 'LinkController@destroy');
+    });
+
+    // 幻灯片
+    Route::group(['prefix' => 'slider'], function () {
+        Route::get('/', 'SliderController@index');
+        Route::post('/', 'SliderController@store');
+        Route::get('/{id}', 'SliderController@edit');
+        Route::put('/{id}', 'SliderController@update');
+        Route::delete('/{id}', 'SliderController@destroy');
     });
 
     // 广告推广
@@ -124,10 +134,12 @@ Route::group(['middleware' => ['auth:administrator']], function () {
     // 课程
     Route::group(['prefix' => 'course'], function () {
         Route::get('/', 'CourseController@index');
+        Route::get('/create', 'CourseController@create');
         Route::post('/', 'CourseController@store');
         Route::get('/{id}', 'CourseController@edit');
         Route::put('/{id}', 'CourseController@update');
         Route::delete('/{id}', 'CourseController@destroy');
+        Route::get('/{id}/subscribe/users', 'CourseController@subscribeUsers');
     });
 
     // 视频
@@ -143,8 +155,12 @@ Route::group(['middleware' => ['auth:administrator']], function () {
     // 会员
     Route::group(['prefix' => 'member'], function () {
         Route::get('/', 'MemberController@index');
-        Route::get('/{id}', 'MemberController@show');
+        Route::get('/create', 'MemberController@create');
+        Route::get('/{id}', 'MemberController@edit');
         Route::post('/', 'MemberController@store');
+        Route::put('/{id}', 'MemberController@update');
+        Route::get('/inviteBalance/withdrawOrders', 'MemberController@inviteBalanceWithdrawOrders');
+        Route::post('/inviteBalance/withdrawOrders', 'MemberController@inviteBalanceWithdrawOrderHandle');
     });
 
     // 网站配置
@@ -159,6 +175,50 @@ Route::group(['middleware' => ['auth:administrator']], function () {
         Route::get('/{id}/finish', 'OrderController@finishOrder');
     });
 
-    Route::post('/upload/image', 'UploadController@uploadImageHandle');
+    // 图片上传
     Route::post('/upload/image/tinymce', 'UploadController@tinymceImageUpload');
+
+    // 优惠码
+    Route::group(['prefix' => 'promoCode'], function () {
+        Route::get('/', 'PromoCodeController@index');
+        Route::post('/', 'PromoCodeController@store');
+        Route::get('/{id}', 'PromoCodeController@edit');
+        Route::put('/{id}', 'PromoCodeController@update');
+        Route::delete('/{id}', 'PromoCodeController@destroy');
+    });
+
+    // 课程分类
+    Route::group(['prefix' => 'courseCategory'], function () {
+        Route::get('/', 'CourseCategoryController@index');
+        Route::post('/', 'CourseCategoryController@store');
+        Route::get('/{id}', 'CourseCategoryController@edit');
+        Route::put('/{id}', 'CourseCategoryController@update');
+        Route::delete('/{id}', 'CourseCategoryController@destroy');
+    });
+
+    // 插件
+    Route::group(['prefix' => 'addons'], function () {
+        Route::get('/', 'AddonsController@index');
+        Route::get('/repository', 'AddonsController@repository');
+        Route::get('/repository/user', 'AddonsController@user');
+        Route::get('/repository/buy', 'AddonsController@buyAddons');
+        Route::get('/repository/install', 'AddonsController@installAddons');
+        Route::get('/repository/upgrade', 'AddonsController@upgradeAddons');
+        Route::post('/switch', 'AddonsController@switchHandler');
+    });
+
+    // IndexBanner
+    Route::group(['prefix' => 'indexBanner'], function () {
+        Route::get('/', 'IndexBannerController@index');
+        Route::get('/create', 'IndexBannerController@create');
+        Route::post('/', 'IndexBannerController@store');
+        Route::get('/{id}', 'IndexBannerController@edit');
+        Route::put('/{id}', 'IndexBannerController@update');
+        Route::delete('/{id}', 'IndexBannerController@destroy');
+    });
+
+    Route::group(['prefix' => 'statistic'], function () {
+        Route::get('/userRegister', 'StatisticController@userRegister');
+        Route::get('/orderCreated', 'StatisticController@orderCreated');
+    });
 });

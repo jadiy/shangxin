@@ -23,7 +23,7 @@ class CacheService implements CacheServiceInterface
 
     public function pull(string $key, $default = null)
     {
-        return Cache::pull($key, $default);
+        return Cache::get($key, $default);
     }
 
     public function lock(string $name, int $seconds)
@@ -34,5 +34,20 @@ class CacheService implements CacheServiceInterface
     public function forget(string $name): void
     {
         Cache::forget($name);
+    }
+
+    public function inc(string $name, $inc = 1)
+    {
+        return Cache::increment($name, $inc);
+    }
+
+    public function has(string $name): bool
+    {
+        return Cache::has($name);
+    }
+
+    public function forever(string $name, $val): bool
+    {
+        return Cache::forever($name, $val);
     }
 }

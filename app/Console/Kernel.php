@@ -28,8 +28,8 @@ class Kernel extends ConsoleKernel
         \Illuminate\Foundation\Bootstrap\RegisterFacades::class,
         \Illuminate\Foundation\Bootstrap\SetRequestForConsole::class,
         \Illuminate\Foundation\Bootstrap\RegisterProviders::class,
-        \Illuminate\Foundation\Bootstrap\BootProviders::class,
         \App\Meedu\AddonsProvider::class,
+        \Illuminate\Foundation\Bootstrap\BootProviders::class,
     ];
 
     /**
@@ -47,23 +47,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        // 定时备份[每天凌晨5点]
-        $schedule->command('meedu:backup')
-            ->withoutOverlapping()
-            ->onOneServer()
-            ->dailyAt('05:00')
-            ->appendOutputTo(storage_path('logs/backup'));
-
         // 每30分钟
         $schedule->command('order:pay:timeout')
             ->onOneServer()
             ->everyThirtyMinutes()
             ->appendOutputTo(storage_path('logs/order_pay_timeout'));
-
-        // AdFrom 数据同步
-        $schedule->command('adfrom:sync')
-            ->onOneServer()
-            ->everyThirtyMinutes();
     }
 
     /**

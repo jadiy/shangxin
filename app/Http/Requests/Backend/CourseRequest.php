@@ -39,6 +39,7 @@ class CourseRequest extends BaseRequest
             'short_description' => 'required',
             'original_desc' => 'required',
             'published_at' => 'required',
+            'category_id' => 'required',
         ];
     }
 
@@ -58,6 +59,7 @@ class CourseRequest extends BaseRequest
     {
         $data = [
             'user_id' => $this->input('user_id', 0),
+            'category_id' => $this->input('category_id'),
             'title' => $this->input('title'),
             'thumb' => $this->input('thumb'),
             'charge' => $this->input('charge', 0),
@@ -68,6 +70,7 @@ class CourseRequest extends BaseRequest
             'seo_description' => $this->input('seo_description', ''),
             'published_at' => $this->input('published_at'),
             'is_show' => $this->input('is_show', Course::SHOW_NO),
+            'is_rec' => $this->input('is_rec', Course::REC_NO),
         ];
 
         if ($this->isMethod('post')) {

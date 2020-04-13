@@ -25,9 +25,12 @@ class EventServiceProvider extends ServiceProvider
             '\App\Listeners\PaymentSuccessEvent\OrderPaidDeliverListener',
             '\App\Listeners\PaymentSuccessEvent\OrderPaidNotificationListener',
             '\App\Listeners\PaymentSuccessEvent\OrderPaidStatusChangeListener',
+            '\App\Listeners\PaymentSuccessEvent\PromoCodeListener',
+            '\App\Listeners\PaymentSuccessEvent\InviteUserRewardListener',
         ],
-        'App\Events\AdFromEvent' => [
-            'App\Listeners\AdFromEvent\AdFromListener',
+        'App\Events\OrderCancelEvent' => [
+            '\App\Listeners\OrderCancelEvent\PromoCodeResumeListener',
+            '\App\Listeners\OrderCancelEvent\InviteBalanceResumeListener',
         ],
         \SocialiteProviders\Manager\SocialiteWasCalled::class => [
             'SocialiteProviders\\WeixinWeb\\WeixinWebExtendSocialite@handle',
@@ -47,6 +50,13 @@ class EventServiceProvider extends ServiceProvider
         'App\Events\UserLoginEvent' => [
             'App\Listeners\UserLoginEvent\SafeAlertListener',
             'App\Listeners\UserLoginEvent\BindMobileListener',
+        ],
+        'App\Events\UserInviteBalanceWithdrawCreatedEvent' => [
+            'App\Listeners\UserInviteBalanceWithdrawCreatedEvent\NotifyListener',
+        ],
+        'App\Events\UserInviteBalanceWithdrawHandledEvent' => [
+            'App\Listeners\UserInviteBalanceWithdrawHandledEvent\NotifyListener',
+            'App\Listeners\UserInviteBalanceWithdrawHandledEvent\RefundBalanceListener',
         ],
     ];
 

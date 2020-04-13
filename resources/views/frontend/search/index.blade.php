@@ -2,51 +2,33 @@
 
 @section('content')
 
-    <header class="header header-inverse">
-        <div class="header-info">
-            <div class="left">
-                <h2 class="header-title"><strong>搜索结果</strong></h2>
-            </div>
-
-            <div class="right">
-                <form class="lookup lookup-circle lookup-lg lookup-right" action="{{route('search')}}" method="get">
-                    @csrf
-                    <input type="text" name="keywords" value="{{request()->input('keywords', '')}}">
-                </form>
-            </div>
-        </div>
-
-        <div class="header-action">
-            <ul class="nav nav-tabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link" href="{{route('courses')}}" role="tab">全部课程</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{{route('videos')}}" role="tab">最新视频</a>
-                </li>
-                <li class="nav-item d-none d-sm-block">
-                    <a class="nav-link active" href="#" role="tab">搜索结果</a>
-                </li>
-            </ul>
-        </div>
-    </header>
-
-    <div class="container pt-40 pb-20">
+    <div class="container py-5">
         <div class="row">
-            <div class="col-sm-12">
-                <div class="card">
-                    <h4 class="card-title">搜索结果 <small>只显示最近的20条数据</small></h4>
-                    <div class="media-list media-list-hover media-list-divided">
-                        @foreach($videos as $video)
-                            <a class="media media-single" href="{{route('video.show', [$video['course_id'], $video['id'], $video['slug']])}}">
-                                <h5 class="title">{{$video['title']}}</h5>
-                                <time datetime="{{$video['published_at']}}">{{$video['published_at']}}</time>
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
+            <div class="col-12 recom-courses-title">
+                <span>搜索结果 <small>只展示最近20条数据</small></span>
+            </div>
+            <div class="col-12 course-list-box">
+                @forelse($courses as $index => $courseItem)
+                    <a href="{{route('course.show', [$courseItem['id'], $courseItem['slug']])}}"
+                       class="course-list-item {{(($index + 1) % 4 === 0) ? 'last' : ''}}">
+                        <div class="course-thumb">
+                            <img src="{{$courseItem['thumb']}}" width="280" height="210" alt="{{$courseItem['title']}}">
+                        </div>
+                        <div class="course-title">
+                            {{$courseItem['title']}}
+                        </div>
+                        <div class="course-category">
+                            <span class="video-count-label">课时：{{$courseItem['videos_count']}}节</span>
+                            <span class="category-label">{{$courseItem['category']['name']}}</span>
+                        </div>
+                    </a>
+                @empty
+                    @include('frontend.components.none')
+                @endforelse
             </div>
         </div>
     </div>
+
+    @include('frontend.components.recom_courses')
 
 @endsection

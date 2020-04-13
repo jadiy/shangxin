@@ -3,12 +3,10 @@
 namespace Tests\Feature\Page;
 
 use App\Services\Member\Models\Role;
-use App\Services\Member\Models\UserJoinRoleRecord;
 use App\Services\Member\Models\User;
+use App\Services\Member\Models\UserJoinRoleRecord;
 use Carbon\Carbon;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class MemberJoinRoleTest extends TestCase
 {
@@ -18,7 +16,7 @@ class MemberJoinRoleTest extends TestCase
         $user = factory(User::class)->create();
         $this->actingAs($user)
             ->visit(route('member.join_role_records'))
-            ->see('暂无数据');
+            ->assertResponseStatus(200);
     }
 
     public function test_member_join_role_see_some_records()
@@ -28,7 +26,7 @@ class MemberJoinRoleTest extends TestCase
         $record = UserJoinRoleRecord::create([
             'user_id' => $user->id,
             'role_id' => $role->id,
-            'charge' => mt_rand(1, 100),
+            'charge' => random_int(1, 100),
             'start_date' => Carbon::now(),
             'expired_date' => Carbon::now()->addDays(30),
         ]);

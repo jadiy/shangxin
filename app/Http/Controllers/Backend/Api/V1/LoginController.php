@@ -11,6 +11,7 @@
 
 namespace App\Http\Controllers\Backend\Api\V1;
 
+use Carbon\Carbon;
 use App\Models\Administrator;
 use App\Constant\BackendApiConstant;
 use Illuminate\Support\Facades\Auth;
@@ -25,13 +26,19 @@ class LoginController extends BaseController
     {
         ['username' => $username, 'password' => $password] = $request->filldata();
         $admin = Administrator::whereEmail($username)->first();
-        if (! $admin) {
+        if (!$admin) {
             return $this->error(BackendApiConstant::ADMINISTRATOR_NOT_EXISTS);
         }
-        if (! Hash::check($password, $admin->password)) {
+        if (!Hash::check($password, $admin->password)) {
             return $this->error(BackendApiConstant::LOGIN_PASSWORD_ERROR);
         }
-        $token = Auth::guard('administrator')->login($admin);
+        // jwt登录
+        $token = Auth::guard(self::GUARD)->login($admin);
+
+        // 登录日志
+        $admin->last_login_ip = $request->getClientIp();
+        $admin->last_login_date = Carbon::now();
+        $admin->save();
 
         return $this->successData(compact('token'));
     }

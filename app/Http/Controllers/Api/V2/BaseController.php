@@ -16,31 +16,64 @@ use App\Constant\ApiV2Constant;
 use App\Exceptions\ApiV2Exception;
 use Illuminate\Support\Facades\Auth;
 use App\Services\Base\Services\CacheService;
+use App\Services\Member\Services\UserService;
 use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Controllers\Api\V2\Traits\ResponseTrait;
 use App\Services\Base\Interfaces\CacheServiceInterface;
+use App\Services\Member\Interfaces\UserServiceInterface;
 
 /**
  * @OpenApi\Annotations\Swagger(
  *     @OA\Info(
  *         title="MeEdu API V2",
  *         version="2.0"
+ *     ),
+ *     @OA\Server(
+ *         url="http://127.0.0.1:8000/api/v2",
+ *         description="local"
  *     )
  * )
  * @OA\SecurityScheme(
- *     securityScheme="https",
+ *     securityScheme="BasicAuth",
+ *     in="header",
  *     type="http",
- *     scheme="Bearer",
- *     description="Authorization Bearer token",
+ *     scheme="scheme",
+ *     bearerFormat="bearer",
+ *     name="bearer"
  * )
- *
+ * @OA\Tag(
+ *     name="课程",
+ *     description="课程相关接口",
+ * ),
+ * @OA\Tag(
+ *     name="视频",
+ *     description="视频相关接口",
+ * ),
+ * @OA\Tag(
+ *     name="用户",
+ *     description="用户相关接口",
+ * ),
+ * @OA\Tag(
+ *     name="Auth",
+ *     description="登录/注册相关接口",
+ * ),
+ * @OA\Tag(
+ *     name="其它",
+ *     description="其它接口",
+ * ),
+ */
+
+/**
  * Class BaseController
+ * @package App\Http\Controllers\Api\V2
  */
 class BaseController
 {
     use ResponseTrait;
 
     protected $guard = 'apiv2';
+
+    protected $user;
 
     /**
      * 图形验证码校验
@@ -64,6 +97,18 @@ class BaseController
     protected function id()
     {
         return Auth::guard($this->guard)->id();
+    }
+
+    protected function user()
+    {
+        if (!$this->user) {
+            /**
+             * @var $userService UserService
+             */
+            $userService = app()->make(UserServiceInterface::class);
+            $this->user = $userService->find($this->id(), ['role']);
+        }
+        return $this->user;
     }
 
     /**

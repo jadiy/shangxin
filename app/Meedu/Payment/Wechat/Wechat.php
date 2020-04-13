@@ -13,6 +13,7 @@ namespace App\Meedu\Payment\Wechat;
 
 use Exception;
 use Yansongda\Pay\Pay;
+use App\Businesses\BusinessState;
 use App\Constant\FrontendConstant;
 use App\Events\PaymentSuccessEvent;
 use Illuminate\Support\Facades\Log;
@@ -39,27 +40,33 @@ class Wechat implements Payment
      * @var CacheService
      */
     protected $cacheService;
+    protected $businessState;
 
     public function __construct(
         ConfigServiceInterface $configService,
         OrderServiceInterface $orderService,
-        CacheServiceInterface $cacheService
+        CacheServiceInterface $cacheService,
+        BusinessState $businessState
     ) {
         $this->configService = $configService;
         $this->orderService = $orderService;
         $this->cacheService = $cacheService;
+        $this->businessState = $businessState;
     }
 
-    public function create(array $order): PaymentStatus
+    public function create(array $order, array $extra = []): PaymentStatus
     {
+        $total = $this->businessState->calculateOrderNeedPaidSum($order);
         try {
             $payOrderData = [
                 'out_trade_no' => $order['order_id'],
-                'total_fee' => $order['charge'] * 100,
+                'total_fee' => $total * 100,
                 'body' => $order['order_id'],
                 'openid' => '',
             ];
+            $payOrderData = array_merge($payOrderData, $extra);
             $createResult = Pay::wechat($this->configService->getWechatPay())->{$order['payment_method']}($payOrderData);
+            Log::info(__METHOD__, compact('createResult'));
 
             // 缓存保存
             $this->cacheService->put(
@@ -101,7 +108,7 @@ class Wechat implements Payment
             $data = $pay->verify();
             Log::info($data);
 
-            $order = $this->orderService->find($data['out_trade_no']);
+            $order = $this->orderService->findOrFail($data['out_trade_no']);
 
             event(new PaymentSuccessEvent($order));
 

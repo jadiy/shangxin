@@ -24,12 +24,13 @@ class FrontendController extends BaseController
      * @param $total
      * @param $page
      * @param $pageSize
-     *
+     * @param string $path
      * @return LengthAwarePaginator
      */
-    protected function paginator($list, $total, $page, $pageSize)
+    protected function paginator($list, $total, $page, $pageSize, $path = '')
     {
-        return new LengthAwarePaginator($list, $total, $pageSize, $page, ['path' => sprintf('/%s', request()->path())]);
+        $path = $path ?: sprintf('/%s', request()->path());
+        return new LengthAwarePaginator($list, $total, $pageSize, $page, ['path' => $path]);
     }
 
     protected function user()

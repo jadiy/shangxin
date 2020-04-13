@@ -12,12 +12,15 @@
 namespace App\Http\Controllers\Frontend;
 
 use Illuminate\Http\Request;
+use App\Businesses\BusinessState;
 use App\Constant\FrontendConstant;
 use App\Exceptions\SystemException;
+use App\Exceptions\ServiceException;
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Cache;
+use App\Services\Base\Services\CacheService;
 use App\Services\Base\Services\ConfigService;
 use App\Services\Order\Services\OrderService;
+use App\Services\Base\Interfaces\CacheServiceInterface;
 use App\Services\Base\Interfaces\ConfigServiceInterface;
 use App\Services\Order\Interfaces\OrderServiceInterface;
 
@@ -31,37 +34,43 @@ class OrderController extends Controller
      * @var ConfigService
      */
     protected $configService;
+    protected $businessState;
+    /**
+     * @var CacheService
+     */
+    protected $cacheService;
 
     public function __construct(
         OrderServiceInterface $orderService,
-        ConfigServiceInterface $configService
+        ConfigServiceInterface $configService,
+        BusinessState $businessState,
+        CacheServiceInterface $cacheService
     ) {
         $this->orderService = $orderService;
         $this->configService = $configService;
-    }
-
-    public function show($orderId)
-    {
-        $order = $this->orderService->findUserNoPaid($orderId);
-        $payments = get_payments(FrontendConstant::PAYMENT_SCENE_PC);
-
-        return v('frontend.order.show', compact('order', 'payments'));
+        $this->businessState = $businessState;
+        $this->cacheService = $cacheService;
     }
 
     /**
      * @param Request $request
-     * @param $orderId
      * @return mixed
+     * @throws ServiceException
      * @throws SystemException
-     * @throws \App\Exceptions\ServiceException
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
-    public function pay(Request $request, $orderId)
+    public function pay(Request $request)
     {
+        $orderId = $request->input('order_id');
         $order = $this->orderService->findUserNoPaid($orderId);
 
-        $payments = get_payments(FrontendConstant::PAYMENT_SCENE_PC);
-        $payment = $order['payment'] ?: $request->post('payment');
-        $paymentMethod = $payments[$payment][FrontendConstant::PAYMENT_SCENE_PC] ?? '';
+        $scene = $request->input('scene');
+        $payment = $request->input('payment');
+        if (!$payment) {
+            throw new ServiceException(__('payment not exists'));
+        }
+        $payments = get_payments($scene);
+        $paymentMethod = $payments[$payment][$scene] ?? '';
         if (!$paymentMethod) {
             throw new SystemException(__('payment method not exists'));
         }
@@ -77,7 +86,7 @@ class OrderController extends Controller
         // 创建远程订单
         $paymentHandler = app()->make($payments[$payment]['handler']);
         $createResult = $paymentHandler->create($order);
-        if ($createResult->status == false) {
+        if ($createResult->status === false) {
             throw new SystemException(__('remote order create failed'));
         }
 
@@ -105,7 +114,9 @@ class OrderController extends Controller
     public function wechat($orderId)
     {
         $order = $this->orderService->findUser($orderId);
-        $wechatData = Cache::get(sprintf(config('cachekey.order.wechat_remote_order.name'), $order['order_id']));
+        $needPaidTotal = $this->businessState->calculateOrderNeedPaidSum($order);
+
+        $wechatData = $this->cacheService->pull(sprintf(FrontendConstant::PAYMENT_WECHAT_PAY_CACHE_KEY, $order['order_id']));
         if (!$wechatData) {
             $this->orderService->cancel($order['id']);
             flash(__('error'));
@@ -115,7 +126,7 @@ class OrderController extends Controller
 
         $qrcodeUrl = $wechatData['code_url'];
 
-        return v('frontend.order.wechat', compact('qrcodeUrl', 'order'));
+        return v('frontend.order.wechat', compact('qrcodeUrl', 'order', 'needPaidTotal'));
     }
 
     /**
@@ -125,7 +136,8 @@ class OrderController extends Controller
     public function handPay($orderId)
     {
         $order = $this->orderService->findUser($orderId);
+        $needPaidTotal = $this->businessState->calculateOrderNeedPaidSum($order);
         $intro = $this->configService->getHandPayIntroducation();
-        return v('frontend.order.hand_pay', compact('order', 'intro'));
+        return v('frontend.order.hand_pay', compact('order', 'intro', 'needPaidTotal'));
     }
 }

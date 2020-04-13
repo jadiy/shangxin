@@ -16,23 +16,16 @@ use Illuminate\Http\Request;
 
 class SettingController extends BaseController
 {
-    public function index()
+    public function index(Setting $setting)
     {
-        $config = [
-            'meedu' => config('meedu'),
-            'sms' => config('sms'),
-            'services' => config('services'),
-            'pay' => config('pay'),
-            'tencent' => config('tencent'),
-            'filesystems' => config('filesystems'),
-        ];
+        $config = $setting->getCanEditConfig();
 
         return $this->successData($config);
     }
 
-    public function saveHandler(Request $request)
+    public function saveHandler(Request $request, Setting $setting)
     {
-        app()->make(Setting::class)->save($request);
+        $setting->save($request);
 
         return $this->success();
     }

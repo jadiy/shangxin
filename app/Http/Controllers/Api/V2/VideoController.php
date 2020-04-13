@@ -11,8 +11,8 @@
 
 namespace App\Http\Controllers\Api\V2;
 
-use Illuminate\Support\Arr;
 use Illuminate\Http\Request;
+use App\Constant\ApiV2Constant;
 use App\Businesses\BusinessState;
 use App\Http\Requests\ApiV2\CommentRequest;
 use App\Services\Base\Services\ConfigService;
@@ -31,32 +31,12 @@ use App\Services\Course\Interfaces\VideoCommentServiceInterface;
 /**
  * @OpenApi\Annotations\Schemas(
  *     @OA\Schema(
- *         schema="Video",
- *         type="object",
- *         title="视频",
- *         @OA\Property(property="id",type="integer",description="视频ID"),
- *         @OA\Property(property="title",type="string",description="视频标题"),
- *         @OA\Property(property="slug",type="string",description="slug"),
- *         @OA\Property(property="charge",type="integer",description="视频价格"),
- *         @OA\Property(property="view_num",type="integer",description="观看次数"),
- *         @OA\Property(property="short_description",type="string",description="简短介绍"),
- *         @OA\Property(property="render_desc",type="string",description="详细介绍"),
- *         @OA\Property(property="published_at",type="string",description="上线时间"),
- *         @OA\Property(property="duration",type="integer",description="视频时长，单位：秒"),
- *     ),
- *     @OA\Schema(
- *         schema="VideoPlay",
+ *         schema="PlayUrlItem",
  *         type="object",
  *         title="视频播放地址",
  *         @OA\Property(property="url",type="string",description="视频播放地址"),
- *         @OA\Property(property="extension",type="string",description="视频格式"),
- *     ),
- *     @OA\Schema(
- *         schema="VideoComment",
- *         type="object",
- *         title="视频评论",
- *         @OA\Property(property="user_id",type="integer",description="用户id"),
- *         @OA\Property(property="content",type="string",description="评论内容"),
+ *         @OA\Property(property="format",type="string",description="视频格式"),
+ *         @OA\Property(property="duration",type="integer",description="时长，秒"),
  *     ),
  * )
  */
@@ -64,6 +44,7 @@ use App\Services\Course\Interfaces\VideoCommentServiceInterface;
 /**
  * Class VideoController
  * @package App\Http\Controllers\Api\V2
+ *
  */
 class VideoController extends BaseController
 {
@@ -119,6 +100,7 @@ class VideoController extends BaseController
      * @OA\Get(
      *     path="/videos",
      *     summary="视频列表",
+     *     tags={"视频"},
      *     @OA\Parameter(in="query",name="page",description="页码",required=false,@OA\Schema(type="integer")),
      *     @OA\Parameter(in="query",name="page_size",description="每页数量",required=false,@OA\Schema(type="integer")),
      *     @OA\Response(
@@ -144,6 +126,7 @@ class VideoController extends BaseController
             'list' => $list,
             'total' => $total
         ] = $this->videoService->simplePage($page, $pageSize);
+        $list = arr2_clear($list, ApiV2Constant::MODEL_VIDEO_FIELD);
         $videos = $this->paginator($list, $total, $page, $pageSize);
 
         return $this->data($videos);
@@ -154,6 +137,7 @@ class VideoController extends BaseController
      *     path="/video/{id}",
      *     @OA\Parameter(in="path",name="id",description="视频id",required=true,@OA\Schema(type="integer")),
      *     summary="视频信息",
+     *     tags={"视频"},
      *     @OA\Response(
      *         description="",response=200,
      *         @OA\JsonContent(
@@ -173,8 +157,11 @@ class VideoController extends BaseController
     public function detail($id)
     {
         $video = $this->videoService->find($id);
+        $this->videoService->viewNumInc($video['id']);
         $chapters = $this->courseService->chapters($video['course_id']);
+        $chapters = arr2_clear($chapters, ApiV2Constant::MODEL_COURSE_CHAPTER_FIELD);
         $videos = $this->videoService->courseVideos($video['course_id']);
+        $videos = arr2_clear($videos, ApiV2Constant::MODEL_VIDEO_FIELD, true);
 
         return $this->data([
             'video' => $video,
@@ -188,6 +175,7 @@ class VideoController extends BaseController
      *     path="/video/{id}/comment",
      *     @OA\Parameter(in="path",name="id",description="视频id",required=true,@OA\Schema(type="integer")),
      *     summary="视频评论",
+     *     tags={"视频"},
      *     @OA\RequestBody(description="",@OA\JsonContent(
      *         @OA\Property(property="content",description="评论内容",type="string"),
      *     )),
@@ -215,7 +203,10 @@ class VideoController extends BaseController
      * @OA\Get(
      *     path="/video/{id}/comments",
      *     @OA\Parameter(in="path",name="id",description="视频id",required=true,@OA\Schema(type="integer")),
+     *     @OA\Parameter(in="query",name="page",description="页码",required=false,@OA\Schema(type="integer")),
+     *     @OA\Parameter(in="query",name="page_size",description="每页数量",required=false,@OA\Schema(type="integer")),
      *     summary="视频评论列表",
+     *     tags={"视频"},
      *     @OA\Response(
      *         description="",response=200,
      *         @OA\JsonContent(
@@ -234,11 +225,9 @@ class VideoController extends BaseController
     public function comments($id)
     {
         $comments = $this->videoCommentService->videoComments($id);
-        $comments = array_map(function ($item) {
-            $item['content'] = $item['render_content'];
-            return Arr::only($item, ['user_id', 'content']);
-        }, $comments);
+        $comments = arr2_clear($comments, ApiV2Constant::MODEL_VIDEO_COMMENT_FIELD);
         $commentUsers = $this->userService->getList(array_column($comments, 'user_id'), ['role']);
+        $commentUsers = arr2_clear($commentUsers, ApiV2Constant::MODEL_MEMBER_FIELD);
         $commentUsers = array_column($commentUsers, null, 'id');
 
         return $this->data([
@@ -247,8 +236,58 @@ class VideoController extends BaseController
         ]);
     }
 
-    public function playInfo()
+    /**
+     * @OA\Get(
+     *     path="/video/{id}/playinfo",
+     *     @OA\Parameter(in="path",name="id",description="视频id",required=true,@OA\Schema(type="integer")),
+     *     summary="视频播放地址",
+     *     tags={"视频"},
+     *     @OA\Response(
+     *         description="",response=200,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="code",type="integer",description="状态码"),
+     *             @OA\Property(property="message",type="string",description="消息"),
+     *             @OA\Property(property="data",type="object",description="",
+     *                 @OA\Property(property="urls",type="array",description="播放地址",@OA\Items(ref="#/components/schemas/PlayUrlItem")),
+     *             ),
+     *         )
+     *     )
+     * )
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function playInfo($id)
     {
-        // todo 视频播放信息
+        $video = $this->videoService->find($id);
+        $course = $this->courseService->find($video['course_id']);
+        if (!$this->businessState->canSeeVideo($this->user(), $course, $video)) {
+            return $this->error(__(ApiV2Constant::VIDEO_NO_AUTH));
+        }
+
+        $urls = [];
+
+        if ($video['url']) {
+            // 直链
+            $pathinfo = @pathinfo($video['url']);
+            $urls = [
+                [
+                    'format' => $pathinfo['extension'] ?? '',
+                    'url' => $video['url'],
+                    'duration' => $video['duration'],
+                ]
+            ];
+        } elseif ($video['aliyun_video_id']) {
+            // 阿里云点播
+            $urls = aliyun_play_url($video['aliyun_video_id']);
+        } elseif ($video['tencent_video_id']) {
+            // 腾讯云点播
+            $urls = get_tencent_play_url($video['tencent_video_id']);
+        }
+
+        if (!$urls) {
+            return $this->error(__('error'));
+        }
+
+        return $this->data(compact('urls'));
     }
 }

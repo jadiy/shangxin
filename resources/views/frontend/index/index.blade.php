@@ -1,169 +1,119 @@
 @extends('layouts.app')
 
+@section('css')
+    <link crossorigin="anonymous" integrity="sha384-K6LrEaceM4QP87RzJ7R4CDXcFN4cFW/A5Q7/fEp/92c2WV+woVw9S9zKDO23sNS+"
+          href="https://lib.baomitu.com/Swiper/4.5.0/css/swiper.min.css" rel="stylesheet">
+    <style>
+        body {
+            padding-top: 71px;
+        }
+        .nav-box {
+            position: fixed;
+            top: 0;
+            z-index: 999;
+        }
+    </style>
+@endsection
+
 @section('content')
 
-    <div class="container-fluid bg-primary pt-60 pb-40">
+    <div class="container-fluid slider-box">
         <div class="container">
             <div class="row">
-                <div class="col-md-8 col-sm-12">
-                    <div class="card hover-shadow-2">
-                        <h4 class="card-title"><strong>关于学习的看法</strong></h4>
-                        <div class="card-body text-dark fw-500">
-                            <p>
-                                很多人对花几百块钱吃一顿饭毫不犹豫，但是对花几百块钱投入学习却犹豫不决。你说TA舍得消费，但是TA又不舍得消费。其实，这很正常，花钱吃饭是一件享受的事情，
-                                但是花钱学习却是一件痛苦的事情，学习从来都不是快乐的事情，这点毋庸置疑。所以，很多情况下，人们总是待在自己的舒适区内，并不是TA不愿意投入，而是不愿意逃离
-                                自己的舒适圈。
-                            </p>
-                            <p>
-                                2019年很多互联网公司都在裁员，裁员规模颇大，很多人失业。其实互联网发展到现在，早期的红利到现在已经分的差不多了，如果技术能力不过关，很有可能就在这次大浪之中被淘汰。
-                                这并不是危言耸听，你会发现，现在很多大学生的技术能力都超过一线的工作人员，这个现象想在越来越普遍，究其原因主要是高校的专业化培养和越来越多的学习资料。一线中的技术人员
-                                如果没有持续学习的能力，很快就会被技术能力强的年轻人所取代。
-                            </p>
-                            <p>
-                                做技术必须要保持终生学习的习惯！
-                            </p>
-                            <p class="text-right">
-
-                            </p>
-                        </div>
-                    </div>
-                <div class="col-md-4 col-sm-12" style="padding-top: 160px;">
-                    <h1 style="padding: 10px 20px; background-color: #fff; color: #4ed2c5; font-weight: 800;">
-                        一切，从这里开始。</h1>
-                    <p class="mt-4">
-                        这里是一些关于我们的介绍
-                    </p>
-                    <p class="mt-4">
-                        <a href="{{route('courses')}}" class="btn btn-lg btn-danger">全部课程</a>
-                    </p>
-                </div>
-
-                <div class="col-md-8 col-sm-12">
-                    <img src="/images/index-banner-img.svg">
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container pt-40 pb-40">
-        <div class="row">
-            <div class="col-sm-12">
-                <div class="divider"><a class="fs-24" href="#">最新课程</a></div>
-            </div>
-            <div class="col-sm-12">
-                <div class="card-deck">
-                    @foreach($gLatestCourses as $index => $course)
-                        @if($index > 2)
-                            @break
-                        @endif
-                        <div class="col-sm-4">
-                            <div class="card hover-shadow-2">
-                                <img class="card-img-top" src="{{ image_url($course['thumb']) }}"
-                                     alt="{{$course['title']}}">
-                                <div class="card-body">
-                                    <h4 class="card-title b-0 px-0">
-                                        <a href="{{ route('course.show', [$course['id'], $course['slug']]) }}">{{$course['title']}}</a>
-                                    </h4>
-                                    <p>
-                                        <small>最后更新：{{$course['updated_at']}}</small>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container-fluid pt-40 pb-40 bg-dark">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-12">
-                    <div class="divider"><span class="fs-24">评价</span></div>
-                </div>
-                <div class="col-md-6 col-lg-4">
-                    <div class="card card-inverse" style="background-color: #3b5998">
-                        <div class="card-header no-border">
-                            <h5 class="card-title card-title-bold">张三</h5>
-                        </div>
-                        <blockquote class="blockquote blockquote-inverse no-border card-body m-0">
-                            <p>这是个好课程 </p>
-                            <div class="flexbox">
-                                <time class="text-white" datetime="2017-10-02 20:00">2019/3/31</time>
-                            </div>
-                        </blockquote>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-lg-4">
-                    <div class="card card-inverse" style="background-color: #3b5998">
-                        <div class="card-header no-border">
-                            <h5 class="card-title card-title-bold">张三</h5>
-                        </div>
-                        <blockquote class="blockquote blockquote-inverse no-border card-body m-0">
-                            <p>这是个好课程 </p>
-                            <div class="flexbox">
-                                <time class="text-white" datetime="2017-10-02 20:00">2019/3/31</time>
-                            </div>
-                        </blockquote>
-                    </div>
-                </div>
-
-                <div class="col-md-6 col-lg-4">
-                    <div class="card card-inverse" style="background-color: #3b5998">
-                        <div class="card-header no-border">
-                            <h5 class="card-title card-title-bold">张三</h5>
-                        </div>
-                        <blockquote class="blockquote blockquote-inverse no-border card-body m-0">
-                            <p>这是个好课程</p>
-                            <div class="flexbox">
-                                <time class="text-white" datetime="2017-10-02 20:00">2019/3/31</time>
-                            </div>
-                        </blockquote>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container pt-70 pb-40">
-        <div class="row justify-content-center">
-            @foreach($gRoles as $index => $role)
-                <div class="col-lg-4">
-                    <div class="card hover-shadow-2">
-                        <div class="card-body text-center">
-                            <h5 class="text-uppercase text-muted">{{$role['name']}}</h5>
-                            <br>
-                            <h3 class="price">
-                                <sup>￥</sup>{{$role['charge']}}
-                                <span>&nbsp;</span>
-                            </h3>
-                            <hr>
-                            @foreach(explode("\n", $role['description']) as $row)
-                                <p>{{$row}}</p>
+                <div class="col-12">
+                    <div class="swiper-container">
+                        <div class="swiper-wrapper">
+                            @foreach($sliders as $slider)
+                                <a class="swiper-slide" href="{{$slider['url']}}">
+                                    <img src="{{$slider['thumb']}}" width="100%" height="400">
+                                </a>
                             @endforeach
-                            <br><br>
-                            <a class="btn btn-bold btn-block btn-primary" href="{{route('role.index')}}">立即订阅</a>
                         </div>
+                        <div class="swiper-pagination"></div>
                     </div>
                 </div>
-            @endforeach
+                @if($gAnnouncement)
+                    <div class="col-12">
+                        <div class="announcement-box">
+                            <a href="{{route('announcement.show', [$gAnnouncement['id']])}}">{{$gAnnouncement['title']}}</a>
+                        </div>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 
-    @if($links)
-        <div class="container pt-40 pb-40">
+    @foreach($banners as $i => $banner)
+        <div class="container-fluid index-latest-banner {{$i % 2 === 0 ? 'bg-fff' : ''}}">
+            <div class="container">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="banner-title">
+                            <img src="/images/icons/index-banner-course.png" width="38" height="35">
+                            <span class="title">{{$banner['name']}}</span>
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <div class="course-list-box">
+                            @foreach($banner['courses'] as $index => $course)
+                                <a href="{{route('course.show', [$course['id'], $course['slug']])}}"
+                                   class="course-list-item {{(($index + 1) % 4 == 0) ? 'last' : ''}}">
+                                    <div class="course-thumb">
+                                        <img src="{{$course['thumb']}}" width="280" height="210"
+                                             alt="{{$course['title']}}">
+                                    </div>
+                                    <div class="course-title">
+                                        {{$course['title']}}
+                                    </div>
+                                    <div class="course-category">
+                                        <span class="video-count-label">课时：{{$course['videos_count']}}节</span>
+                                        <span class="category-label">{{$course['category']['name']}}</span>
+                                    </div>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endforeach
+
+    <div class="container inspire">
+        <div class="row">
+            <div class="col-12">
+                <span>拥抱MeEdu 拥抱知识付费时代</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid friend-link-box">
+        <div class="container">
             <div class="row">
-                <div class="col-sm-12">
-                    <h5>友情链接</h5>
+                <div class="col-12 friend-link-box-logo">
+                    <img src="{{$gConfig['system']['logo']}}" height="37" alt="{{config('app.name')}}">
+                </div>
+                <div class="col-12 friend-link-box-link">
                     @foreach($links as $link)
-                        <a href="{{$link['url']}}" target="_blank"
-                           style="margin-right: 2px; margin-bottom: 2px;">{{$link['name']}}</a>
+                        <a href="{{$link['url']}}" target="_blank">{{$link['name']}}</a>
                     @endforeach
                 </div>
             </div>
         </div>
-    @endif
+    </div>
 
+@endsection
+
+@section('js')
+    <script crossorigin="anonymous" integrity="sha384-fOtis9P3S4B2asdoye1/YBpXMaRmuXu925gZhfQA/gnU3dLnftD8zvpk/lhP0YSG"
+            src="https://lib.baomitu.com/Swiper/4.5.0/js/swiper.min.js"></script>
+    <script>
+        var mySwiper = new Swiper('.swiper-container', {
+            autoplay: true,
+            effect: 'fade',
+            pagination: {
+                el: '.swiper-pagination',
+                clickable: true,
+            },
+        });
+    </script>
 @endsection

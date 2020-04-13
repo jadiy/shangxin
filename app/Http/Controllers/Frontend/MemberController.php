@@ -12,6 +12,7 @@
 namespace App\Http\Controllers\Frontend;
 
 use Illuminate\Http\Request;
+use App\Businesses\BusinessState;
 use Illuminate\Support\Facades\Auth;
 use App\Services\Base\Services\ConfigService;
 use App\Services\Member\Services\RoleService;
@@ -19,6 +20,7 @@ use App\Services\Member\Services\UserService;
 use App\Services\Order\Services\OrderService;
 use App\Services\Course\Services\VideoService;
 use App\Services\Course\Services\CourseService;
+use App\Services\Order\Services\PromoCodeService;
 use App\Services\Member\Services\SocialiteService;
 use App\Http\Requests\Frontend\Member\MobileBindRequest;
 use App\Services\Base\Interfaces\ConfigServiceInterface;
@@ -28,8 +30,12 @@ use App\Services\Order\Interfaces\OrderServiceInterface;
 use App\Services\Course\Interfaces\VideoServiceInterface;
 use App\Http\Requests\Frontend\Member\AvatarChangeRequest;
 use App\Services\Course\Interfaces\CourseServiceInterface;
+use App\Services\Member\Services\UserInviteBalanceService;
+use App\Services\Order\Interfaces\PromoCodeServiceInterface;
 use App\Services\Member\Interfaces\SocialiteServiceInterface;
 use App\Http\Requests\Frontend\Member\MemberPasswordResetRequest;
+use App\Http\Requests\Frontend\Member\InviteBalanceWithdrawRequest;
+use App\Services\Member\Interfaces\UserInviteBalanceServiceInterface;
 
 class MemberController extends FrontendController
 {
@@ -61,6 +67,18 @@ class MemberController extends FrontendController
      * @var ConfigService
      */
     protected $configService;
+    /**
+     * @var PromoCodeService
+     */
+    protected $promoCodeService;
+    /**
+     * @var BusinessState
+     */
+    protected $businessState;
+    /**
+     * @var UserInviteBalanceService
+     */
+    protected $userInviteBalanceService;
 
     public function __construct(
         UserServiceInterface $userService,
@@ -69,7 +87,10 @@ class MemberController extends FrontendController
         RoleServiceInterface $roleService,
         OrderServiceInterface $orderService,
         SocialiteServiceInterface $socialiteService,
-        ConfigServiceInterface $configService
+        ConfigServiceInterface $configService,
+        PromoCodeServiceInterface $promoCodeService,
+        BusinessState $businessState,
+        UserInviteBalanceServiceInterface $userInviteBalanceService
     ) {
         $this->userService = $userService;
         $this->courseService = $courseService;
@@ -78,13 +99,22 @@ class MemberController extends FrontendController
         $this->orderService = $orderService;
         $this->socialiteService = $socialiteService;
         $this->configService = $configService;
+        $this->promoCodeService = $promoCodeService;
+        $this->businessState = $businessState;
+        $this->userInviteBalanceService = $userInviteBalanceService;
     }
 
     public function index()
     {
         $title = __('page_title_member_index');
 
-        return v('frontend.member.index', compact('title'));
+        $courseCount = $this->userService->getCurrentUserCourseCount();
+        $videoCount = $this->userService->getCurrentUserVideoCount();
+
+        $apps = $this->socialiteService->userSocialites(Auth::id());
+        $apps = array_column($apps, null, 'app');
+
+        return v('frontend.member.index', compact('title', 'courseCount', 'videoCount', 'apps'));
     }
 
     public function showPasswordResetPage()
@@ -203,18 +233,55 @@ class MemberController extends FrontendController
     public function showBuyCoursePage(Request $request)
     {
         $page = $request->input('page', 1);
+        $scene = $request->input('scene');
         $pageSize = 10;
-        [
-            'total' => $total,
-            'list' => $list,
-        ] = $this->userService->getUserBuyCourses($page, $pageSize);
+        if (!$scene) {
+            [
+                'total' => $total,
+                'list' => $list,
+            ] = $this->userService->getUserBuyCourses($page, $pageSize);
+            $courses = $this->courseService->getList(array_column($list, 'course_id'));
+            $courses = array_column($courses, null, 'id');
+        } elseif ($scene === 'history') {
+            // 学习历史
+            [
+                'total' => $total,
+                'list' => $list,
+            ] = $this->courseService->userLearningCoursesPaginate(Auth::id(), $page, $pageSize);
+            $courses = $this->courseService->getList(array_column($list, 'course_id'));
+            $courses = array_column($courses, null, 'id');
+        } elseif ($scene === 'like') {
+            // 我的收藏
+            [
+                'total' => $total,
+                'list' => $list,
+            ] = $this->userService->userLikeCoursesPaginate(Auth::id(), $page, $pageSize);
+            $courses = $this->courseService->getList(array_column($list, 'course_id'));
+            $courses = array_column($courses, null, 'id');
+        } else {
+            // 购买的视频
+            $videoIds = $this->userService->getUserBuyAllVideosId();
+            $videos = $this->videoService->getList($videoIds);
+            $courses = $this->courseService->getList(array_column($videos, 'course_id'));
+            $courses = array_column($courses, null, 'id');
+            $list = collect($videos)->groupBy('course_id')->toArray();
+            $total = count($list);
+        }
         $records = $this->paginator($list, $total, $page, $pageSize);
-        $courses = $this->courseService->getList(array_column($list, 'course_id'));
-        $courses = array_column($courses, null, 'id');
 
         $title = __('title.member.courses');
 
-        return v('frontend.member.buy_course', compact('records', 'title', 'courses'));
+        $queryParams = function ($param) {
+            $request = \request();
+            $params = [
+                'page' => $request->input('page'),
+                'scene' => $request->input('scene', ''),
+            ];
+            $params = array_merge($params, $param);
+            return http_build_query($params);
+        };
+
+        return v('frontend.member.buy_course', compact('records', 'title', 'courses', 'scene', 'queryParams'));
     }
 
     /**
@@ -255,7 +322,7 @@ class MemberController extends FrontendController
         $orders = $this->paginator($list, $total, $page, $pageSize);
         $title = __('title.member.orders');
 
-        return v('frontend.member.show_orders', compact('orders', 'title'));
+        return v('frontend.member.orders', compact('orders', 'title'));
     }
 
     /**
@@ -278,6 +345,104 @@ class MemberController extends FrontendController
     public function cancelBindSocialite($app)
     {
         $this->socialiteService->cancelBind($app);
+        flash(__('success'), 'success');
+        return back();
+    }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     */
+    public function showPromoCodePage(Request $request)
+    {
+        $scene = $request->input('scene');
+        $page = abs((int)$request->input('page', 1));
+        $pageSize = 10;
+        $userPromoCode = $this->promoCodeService->userPromoCode();
+        $inviteConfig = $this->configService->getMemberInviteConfig();
+
+        $inviteUsers = [];
+        $balanceRecords = [];
+        $withdrawOrders = [];
+
+        if (!$scene) {
+            // 邀请记录
+            [
+                'list' => $list,
+                'total' => $total,
+            ] = $this->userService->inviteUsers($page, $pageSize);
+            $inviteUsers = $this->paginator($list, $total, $page, $pageSize);
+            $inviteUsers->appends($request->all());
+        } elseif ($scene === 'records') {
+            // 余额明细
+            [
+                'list' => $list,
+                'total' => $total,
+            ] = $this->userInviteBalanceService->simplePaginate($page, $pageSize);
+            $balanceRecords = $this->paginator($list, $total, $page, $pageSize);
+            $balanceRecords->appends($request->all());
+        } elseif ($scene === 'withdraw') {
+            // 提现记录
+            [
+                'list' => $list,
+                'total' => $total,
+            ] = $this->userInviteBalanceService->currentUserOrderPaginate($page, $pageSize);
+            $withdrawOrders = $this->paginator($list, $total, $page, $pageSize);
+            $withdrawOrders->appends($request->all());
+        }
+
+        // 分页
+        $queryParams = function ($param) {
+            $request = \request();
+            $params = [
+                'page' => $request->input('page'),
+                'scene' => $request->input('scene', ''),
+            ];
+            $params = array_merge($params, $param);
+            return http_build_query($params);
+        };
+
+        $title = __('title.member.promo_code');
+        return v('frontend.member.promo_code', compact(
+            'userPromoCode',
+            'title',
+            'inviteConfig',
+            'inviteUsers',
+            'scene',
+            'queryParams',
+            'balanceRecords',
+            'withdrawOrders'
+        ));
+    }
+
+    /**
+     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     */
+    public function generatePromoCode()
+    {
+        if (!$this->businessState->canGenerateInviteCode($this->user())) {
+            flash(__('current user cant generate promo code'));
+            return back();
+        }
+        $this->promoCodeService->userCreate($this->user());
+        flash(__('success'), 'success');
+        return redirect(route('member.promo_code'));
+    }
+
+    /**
+     * @param InviteBalanceWithdrawRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+     * @throws \App\Exceptions\ServiceException
+     */
+    public function createInviteBalanceWithdrawOrder(InviteBalanceWithdrawRequest $request)
+    {
+        $total = $request->post('total');
+        if ($this->user()['invite_balance'] < $total) {
+            flash(__('Insufficient invite balance'));
+            return back();
+        }
+        $data = $request->filldata();
+        $this->userInviteBalanceService->createCurrentUserWithdraw($data['total'], $data['channel']);
         flash(__('success'), 'success');
         return back();
     }

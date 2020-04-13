@@ -12,8 +12,8 @@
 namespace App\Meedu\Payment\Alipay;
 
 use Exception;
-use App\Models\Order;
 use Yansongda\Pay\Pay;
+use App\Businesses\BusinessState;
 use App\Events\PaymentSuccessEvent;
 use Illuminate\Support\Facades\Log;
 use App\Meedu\Payment\Contract\Payment;
@@ -33,29 +33,32 @@ class Alipay implements Payment
      * @var OrderService
      */
     protected $orderService;
+    protected $businessState;
 
     public function __construct(
         ConfigServiceInterface $configService,
-        OrderServiceInterface $orderService
+        OrderServiceInterface $orderService,
+        BusinessState $businessState
     ) {
         $this->configService = $configService;
         $this->orderService = $orderService;
+        $this->businessState = $businessState;
     }
 
     /**
-     * 创建支付宝订单.
-     *
-     * @param Order $order
-     *
+     * @param array $order
+     * @param array $extra
      * @return PaymentStatus
      */
-    public function create(array $order): PaymentStatus
+    public function create(array $order, array $extra = []): PaymentStatus
     {
+        $total = $this->businessState->calculateOrderNeedPaidSum($order);
         $payOrderData = [
             'out_trade_no' => $order['order_id'],
-            'total_amount' => $order['charge'],
+            'total_amount' => $total,
             'subject' => $order['order_id'],
         ];
+        $payOrderData = array_merge($payOrderData, $extra);
         $createResult = Pay::alipay($this->configService->getAlipayPay())->{$order['payment_method']}($payOrderData);
 
         return new PaymentStatus(true, $createResult);
@@ -78,7 +81,7 @@ class Alipay implements Payment
             $data = $pay->verify();
             Log::info($data);
 
-            $order = $this->orderService->find($data['out_trade_no']);
+            $order = $this->orderService->findOrFail($data['out_trade_no']);
 
             event(new PaymentSuccessEvent($order));
 

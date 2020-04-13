@@ -11,64 +11,46 @@
 </a>
 </p>
 
+> Github首页README赞助广告位开启，有意赞助的小伙伴通过下方的联系方式联系。
+
 ## 介绍
 
 随着知识付费领域的兴起，尤其是知识付费领域的龙头“得到”的成功，知识付费领域俨然成为了新的风口。经过这几年的发展，知识付费领域的基础建设有了很大的进步，市场上面很多知识付费的平台可以在短短几分钟之内搭建一套属于自己的知识付费应用。但是，这并不是我想要的！可能是处于程序员的角度出发，我更在乎的是这套应用是我自己可以完全控制的！所以 *MeEdu* 诞生了。*MeEdu* 寄托了我对当前知识付费领域的期望。我相信未来的每位身负技能的人都可以通过 *MeEdu* 来构建自己的知识付费应用，通过 *MeEdu* 将自己的知识进行变现。
 
-## 常见问题
+## 在线装服务
 
-- [MeEdu 作者录制的简单安装视频教程](https://www.bilibili.com/video/av36024146/)  
-- [使用Docker简单快速的搭建MeEdu（适合小白）](https://www.bilibili.com/video/av44963351/)
-- [MeEdu使用阿里云视频加密服务保障视频安全性(手把手教程)](https://www.bilibili.com/video/av45755754/)
+如果您想使用MeEdu但是却不会安装MeEdu，那么您可以考虑MeEduCloud平台提供的在线装服务(这是一项收费服务)，它可以自动的帮您将MeEdu安装到您的服务器上。[点击查看详情](https://meedu.vip/hostPackages)
 
-> 作者提供收费安装/升级服务，一次安装/升级的价格为27元=一杯咖啡。如果您有需要加我微信，备注"安装meedu"，我会及时与您联系。联系方式下拉到底部。
+## 傻瓜安装
 
-## 使用站点
+傻瓜安装包请到我们的QQ群文件下载。加QQ群请扫描文末的QQ群二维码。
 
-| 站点名 | 地址 |
-| --- | --- |
-| [小滕教学](https://58hualong.com) | `https://58hualong.com` |
-| [青萍教育](http://www.qingpingjiaoyu.com/) | `http://www.qingpingjiaoyu.com` |
-| [聆鹿故事](http://edu.ilinglu.cn/) | `http://edu.ilinglu.cn` |
-| **生活趣学堂** | 微信公众号：生活趣学堂 |
-| [Seekdeer(K线教学)](http://www.seekdeer.com/) | `http://www.seekdeer.com/` |
+## 宝塔安装
 
-## 有哪些企业在使用
-
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="middle">
-        <a href="https://video.heyhighschool.com?from=meedu_github" target="_blank" title="上海高育教育科技有限公司">
-          <img width="100px" title="上海高育教育科技有限公司" src="https://user-images.githubusercontent.com/12671205/60409095-92e02780-9bf4-11e9-8cf6-cb6b75a718f3.jpg">
-        </a>
-      </td>
-    </tr><tr></tr>
-  </tbody>
-</table>
+MeEdu 已上架宝塔一键部署服务。使用宝塔面板的小伙伴可以在宝塔的一键部署列表中搜索meedu并部署安装 meedu 。
 
 ## 当前功能概览
 
-- [x] [微信小程序](https://github.com/YTU94/meedu-wxapp)
-- [x] 视频在线点播/视频加密播放
-- [x] 手机号注册
-- [x] 会员/课程单独购买两种收费模式
+- [x] [微信小程序](https://github.com/Meedu/wechat-mini)
+- [x] 阿里云视频点播服务/腾讯云视频点播服务/视频直链三种视频播放方式
+- [x] 手机号注册/登录/密码找回
+- [x] 课程单独购买/视频单独购买/全站会员三种收费模式
 - [x] 站内消息
 - [x] 支付宝支付/微信支付/手动转账
+- [x] 优惠码功能
+- [x] 邀请功能，一级返现
 - [x] 单元测试
-- [x] 系统公告
 - [x] SEO优化
-- [x] 数据定时备份
 - [x] 友情链接
 - [x] QQ登录/Github登录/微信登录
 - [x] 插件系统
-- [x] Swagger Api文档管理
+- [x] 模板系统
 
 ## FAQ
 
 - [API接口](https://meedu-v2-xiaoteng.doc.coding.io/)
 - [安装教程](docs/安装教程.md)
-- [MeEdu使用教程](docs/使用教程.md)
+- [MeEdu常见问题总结及功能介绍](https://www.yuque.com/meedu/yr7rek)
 
 ## License
 
@@ -82,6 +64,7 @@
 | --- | --- |
 | `Baiyuetribe` | [https://github.com/Baiyuetribe](https://github.com/Baiyuetribe) |
 | `Ron.wiki` | [http://ron.wiki](http://ron.wiki) |
+| `Aunger` | [https://www.aunwen.com](https://www.aunwen.com) |
 
 ## 捐赠
 

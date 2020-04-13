@@ -39,6 +39,7 @@ class RegisterController extends BaseController
      * @OA\Post(
      *     path="/register/mobile",
      *     summary="手机号注册",
+     *     tags={"Auth"},
      *     @OA\RequestBody(description="",@OA\JsonContent(
      *         @OA\Property(property="mobile",description="手机号",type="string"),
      *         @OA\Property(property="mobile_code",description="手机验证码",type="string"),
@@ -64,7 +65,7 @@ class RegisterController extends BaseController
         if ($user) {
             return $this->error(__(ApiV2Constant::MOBILE_HAS_EXISTS));
         }
-        $this->userService->createWithMobile($mobile, Str::random(), Str::random(3) . substr($mobile, 0, 9));
+        $this->userService->createWithMobile($mobile, '', '');
         return $this->success();
     }
 }

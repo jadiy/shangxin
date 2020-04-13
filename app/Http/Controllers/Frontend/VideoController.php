@@ -13,6 +13,7 @@ namespace App\Http\Controllers\Frontend;
 
 use Illuminate\Http\Request;
 use App\Businesses\BusinessState;
+use App\Constant\FrontendConstant;
 use Illuminate\Support\Facades\Auth;
 use App\Services\Base\Services\ConfigService;
 use App\Services\Member\Services\UserService;
@@ -90,17 +91,25 @@ class VideoController extends FrontendController
         return v('frontend.video.index', compact('videos', 'title'));
     }
 
-    public function show($courseId, $id, $slug)
+    public function show(Request $request, $courseId, $id, $slug)
     {
+        $scene = $request->input('scene');
+        $course = $this->courseService->find($courseId);
         $video = $this->videoService->find($id);
+        $this->videoService->viewNumInc($video['id']);
+
+        // 视频评论
         $comments = $this->videoCommentService->videoComments($video['id']);
-        $commentUsers = $this->userService->getList(array_column($comments, 'user_id'));
+        $commentUsers = $this->userService->getList(array_column($comments, 'user_id'), ['role']);
         $commentUsers = array_column($commentUsers, null, 'id');
+
+        // 课程章节
         $chapters = $this->courseService->chapters($video['course_id']);
         $videos = $this->videoService->courseVideos($video['course_id']);
         $canSeeVideo = false;
         if (Auth::check()) {
             $canSeeVideo = $this->businessState->canSeeVideo($this->user(), $video['course'], $video);
+            $canSeeVideo && $this->courseService->recordUserCount(Auth::id(), $course['id']);
         }
 
         $title = $video['title'];
@@ -108,6 +117,7 @@ class VideoController extends FrontendController
         $description = $video['seo_description'];
 
         return v('frontend.video.show', compact(
+            'course',
             'video',
             'title',
             'keywords',
@@ -116,25 +126,58 @@ class VideoController extends FrontendController
             'commentUsers',
             'videos',
             'chapters',
-            'canSeeVideo'
+            'canSeeVideo',
+            'scene'
         ));
     }
 
+    /**
+     * @param $id
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\Http\RedirectResponse|\Illuminate\View\View
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
+     */
     public function showBuyPage($id)
     {
         $video = $this->videoService->find($id);
+        if ($this->userService->hasVideo(Auth::id(), $video['id'])) {
+            flash(__('You have already purchased this course'), 'success');
+            return back();
+        }
+        $course = $this->courseService->find($video['course_id']);
         $title = __('buy video', ['video' => $video['title']]);
+        $goods = [
+            'id' => $video['id'],
+            'title' => $video['title'],
+            'thumb' => $course['thumb'],
+            'charge' => $video['charge'],
+            'label' => '单节视频',
+        ];
+        $total = $video['charge'];
+        $scene = get_payment_scene();
+        $payments = get_payments($scene);
 
-        return v('frontend.video.buy', compact('video', compact('title')));
+        return v('frontend.order.create', compact('goods', 'title', 'total', 'scene', 'payments'));
     }
 
-    public function buyHandler($id)
+    public function buyHandler(Request $request)
     {
+        $id = $request->input('goods_id');
+        $promoCodeId = abs((int)$request->input('promo_code_id', 0));
         $video = $this->videoService->find($id);
-        $order = $this->orderService->createVideoOrder(Auth::id(), $video);
+        if ($video['charge'] <= 0) {
+            flash(__('video cant buy'));
+            return back();
+        }
+        $order = $this->orderService->createVideoOrder(Auth::id(), $video, $promoCodeId);
 
-        flash(__('order successfully, please pay'), 'success');
+        if ($order['status'] === FrontendConstant::ORDER_PAID) {
+            flash(__('success'), 'success');
+            return redirect(route('video.show', [$video['course_id'], $video['id'], $video['slug']]));
+        }
 
-        return redirect(route('order.show', $order['order_id']));
+        $paymentScene = $request->input('payment_scene');
+        $payment = $request->input('payment_sign');
+
+        return redirect(route('order.pay', ['scene' => $paymentScene, 'payment' => $payment, 'order_id' => $order['order_id']]));
     }
 }

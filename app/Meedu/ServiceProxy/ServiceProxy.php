@@ -62,7 +62,7 @@ class ServiceProxy
     }
 
     /**
-     * @param string   $methodName
+     * @param string $methodName
      * @param \Closure $cacheHandler
      *
      * @return $this
@@ -103,9 +103,7 @@ class ServiceProxy
         // 限流
         $this->limitHandler($name, $arguments);
         // 缓存
-        $response = $this->cacheHandler($name, $arguments);
-
-        return $response;
+        return $this->cacheHandler($name, $arguments);
     }
 
     /**
@@ -116,23 +114,24 @@ class ServiceProxy
      */
     public function cacheHandler($name, $args)
     {
-        if (! isset($this->cache[$name]) || ! $this->configService->getCacheStatus()) {
+        if (!isset($this->cache[$name]) || !$this->configService->getCacheStatus()) {
             // 未开启缓存 || 没开启缓存
             return $this->run([$this->service, $name], $args);
         }
+        /**
+         * @var $cacheInfo CacheInfo
+         */
         $cacheInfo = $this->run($this->cache[$name], $args);
-        if (! $cacheInfo) {
+        if (!$cacheInfo) {
             return $this->run([$this->service, $name], $args);
         }
-        /**
-         * @var CacheInfo
-         */
         $cacheData = $this->cacheService->pull($cacheInfo->getName(), null);
         if ($cacheData) {
             return $cacheData;
         }
 
         $response = $this->run([$this->service, $name], $args);
+
         $this->cacheService->put($cacheInfo->getName(), $response, $cacheInfo->getExpire());
 
         return $response;
@@ -153,7 +152,7 @@ class ServiceProxy
          */
         $lockInfo = call_user_func_array($this->lock[$name], $args);
         $lock = $this->cacheService->lock($lockInfo->getName(), $lockInfo->getSeconds());
-        if (! $lock->get()) {
+        if (!$lock->get()) {
             // 无法获取锁
             throw new SystemException(__('error'));
         }
@@ -166,20 +165,20 @@ class ServiceProxy
     /**
      * @param $name
      * @param $args
-     *
      * @throws SystemException
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     protected function limitHandler($name, $args)
     {
-        if (! isset($this->limit[$name])) {
+        if (!isset($this->limit[$name])) {
             return;
         }
         /**
-         * @var LimiterInfo
+         * @var $limiterInfo LimiterInfo
          */
         $limiterInfo = call_user_func_array($this->limit[$name], $args);
         /**
-         * @var RateLimiter
+         * @var $rateLimiter RateLimiter
          */
         $rateLimiter = app()->make(RateLimiter::class);
         if ($rateLimiter->tooManyAttempts($limiterInfo->getName(), $limiterInfo->getMaxTimes())) {

@@ -51,7 +51,7 @@ return [
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL') . '/storage',
+            'url' => '/storage',
             'visibility' => 'public',
         ],
 
@@ -84,9 +84,9 @@ return [
             'access_key' => env('ALI_OSS_ACCESS_KEY'),
             'bucket' => env('ALI_OSS_BUCKET'),
             'endpoint' => env('ALI_OSS_ENDPOINT'),
-            'cdnDomain' => '',
+            'cdnDomain' => env('ALI_OSS_DOMAIN'),
             'ssl' => true,
-            'isCName' => false,
+            'isCName' => true,
             'debug' => false
         ],
 

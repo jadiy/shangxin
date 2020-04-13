@@ -11,10 +11,14 @@
 
 namespace App\Http\Controllers\Frontend;
 
+use App\Services\Base\Services\ConfigService;
 use App\Services\Base\Interfaces\ConfigServiceInterface;
 
 class PaymentController extends FrontendController
 {
+    /**
+     * @var ConfigService
+     */
     protected $configService;
 
     public function __construct(ConfigServiceInterface $configService)
@@ -23,16 +27,14 @@ class PaymentController extends FrontendController
     }
 
     /**
-     * 支付回调.
-     *
      * @param $payment
-     *
      * @return mixed
+     * @throws \Illuminate\Contracts\Container\BindingResolutionException
      */
     public function callback($payment)
     {
         $payments = $this->configService->getPayments();
-        if (! isset($payments[$payment])) {
+        if (!isset($payments[$payment])) {
             abort(404);
         }
         $handler = $payments[$payment]['handler'];

@@ -4,8 +4,6 @@ namespace Tests\Feature\Page;
 
 use App\Services\Member\Models\User;
 use Tests\TestCase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 
 class MemberAvatarTest extends TestCase
 {
@@ -24,7 +22,7 @@ class MemberAvatarTest extends TestCase
         $this->actingAs($user)
             ->visit(route('member.avatar'))
             ->attach(base_path('/public/images/meedu.png'), 'file')
-            ->press('更换')
+            ->press('更换头像')
             ->seePageIs(route('member.avatar'));
     }
 
